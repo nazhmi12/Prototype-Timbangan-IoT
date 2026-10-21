@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Cold Storage &amp; Chilling – Sistem Timbang RPHU</title>
+  <link rel="stylesheet" href="../assets/css/main.css">
+  <link rel="stylesheet" href="../assets/css/dashboard.css">
+  <link rel="stylesheet" href="../assets/css/responsive.css">
+</head>
+<body>
+  <div class="top-strip"></div>
+  <header class="hdr">
+    <div class="brand">
+      <div class="brand-logo-badge">RPHU</div>
+      <div class="brand-text">
+        <b>RPHU MODERN</b>
+        <small>Smart Poultry System</small>
+      </div>
+      <div class="sys-title">
+        Sistem Timbang dan Susut RPHU
+        <span class="sys-badge">Cold Chain</span>
+      </div>
+      <div class="station-pill">
+        <span class="dot-online"></span>
+        <span>Stasiun: <b id="currentStationLabel">Cold Storage</b></span>
+      </div>
+    </div>
+    <div class="header-status">
+      <div class="seg-toggle" role="group" aria-label="Mode tampilan">
+        <button data-m="light" aria-pressed="false" type="button">Terang</button>
+        <button data-m="dark" aria-pressed="false" type="button">Gelap</button>
+      </div>
+
+      <!-- Pojok Kanan Atas: Tanggal/Waktu & Profil Operator -->
+      <div class="header-right-corner">
+        <div class="header-datetime" title="Waktu Sistem Operasional">
+          <span id="tgl"></span>
+        </div>
+        <div class="user-profile">
+          <span class="user-name" id="currentUserLabel">Petugas Chilling</span>
+          <button class="btn-logout" id="btnLogout" type="button">Keluar</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="app-container">
+    <aside class="sidebar">
+      <nav aria-label="Menu Navigasi">
+        <div class="nav-section-title">Operasional</div>
+        <a href="penerimaan-ayam.html">Penerimaan ayam</a>
+        <a href="timbang-susut.html">Timbang &amp; susut</a>
+        <a href="produksi.html">Produksi</a>
+        <a href="cold-storage.html" class="active">Stok cold storage</a>
+        <a href="penjualan.html">Penjualan</a>
+
+        <div class="nav-section-title">Data &amp; Laporan</div>
+        <a href="dashboard.html">Dashboard KPI</a>
+        <a href="peternak.html">Peternak</a>
+        <a href="laporan.html">Laporan</a>
+
+        <div class="nav-section-title">Administrasi Sistem</div>
+        <a href="users.html">Manajemen User</a>
+        <a href="log-aktivitas.html">Log Aktivitas</a>
+      </nav>
+      <div class="sidebar-footer">
+        <p><b>Rantai Pendingin (Cold Chain)</b><br>Suhu Standar: 0°C s/d 4°C</p>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <div class="crumb">Beranda / Operasional / Manajemen Cold Storage</div>
+      <div class="page-header">
+        <h2 class="page-title">Inventori Karkas Dingin &amp; Evaluasi Chilling</h2>
+        <div class="page-actions">
+          <a href="timbang-susut.html" class="btn btn-primary">Timbang Karkas Dingin</a>
+        </div>
+      </div>
+
+      <!-- Parameter Suhu & Kondisi Ruangan -->
+      <div class="kpi-row">
+        <div class="kpi-card">
+          <div class="kpi-card-label">Suhu Spin Chiller Bak 1</div>
+          <div class="kpi-card-value">1.8°C</div>
+          <div class="kpi-card-sub">
+            <span class="kpi-badge kpi-badge-normal">Dingin</span>
+            <span>Water Pickup &le; 8%</span>
+          </div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-card-label">Suhu Anteroom Cold Storage</div>
+          <div class="kpi-card-value">2.4°C</div>
+          <div class="kpi-card-sub">
+            <span class="kpi-badge kpi-badge-normal">Optimal</span>
+            <span>Kelembaban 88% RH</span>
+          </div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-card-label">Air Blast Freezer (ABF)</div>
+          <div class="kpi-card-value">−34.5°C</div>
+          <div class="kpi-card-sub">
+            <span class="kpi-badge kpi-badge-good">Deep Freeze</span>
+            <span>Kapasitas 10 Ton</span>
+          </div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-card-label">Total Stok Karkas Dingin</div>
+          <div class="kpi-card-value" id="kpiStokDingin">0 kg</div>
+          <div class="kpi-card-sub">
+            <span class="kpi-badge">Stok</span>
+            <span>Siap Distribusi</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Evaluasi Perubahan Bobot Chilling -->
+      <section class="box">
+        <div class="box-header">
+          <span>Evaluasi Perubahan Bobot Chilling (Basah &rarr; Dingin)</span>
+          <span style="font-size:12px;opacity:0.85;">Line Chilling Tank &amp; Cold Room</span>
+        </div>
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th class="text-left">Lot ID</th>
+                <th class="text-left">Peternak / Pemasok</th>
+                <th class="text-right">Karkas Basah</th>
+                <th class="text-right">Karkas Dingin</th>
+                <th class="text-right">Perubahan Bobot</th>
+                <th class="text-left">Karakteristik Chilling</th>
+                <th class="text-right">Yield Akhir (%)</th>
+                <th class="text-center">Status Chilling</th>
+                <th class="text-center">Aksi Operasional</th>
+              </tr>
+            </thead>
+            <tbody id="chillingTableBody">
+              <tr><td colspan="9" style="text-align:center;padding:24px;color:var(--mute);">Memuat data evaluasi chilling...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="../assets/js/api.js"></script>
+  <script src="../assets/js/auth.js"></script>
+  <script src="../assets/js/lot.js"></script>
+  <script src="../assets/js/app.js"></script>
+  <script>
+    async function initColdStorage() {
+      await LotStore.init();
+      renderChillingData();
+    }
+
+    function renderChillingData() {
+      const lots = LotStore.getAll();
+      const tbody = document.getElementById('chillingTableBody');
+      const kpiStok = document.getElementById('kpiStokDingin');
+
+      // Hitung total stok karkas dingin
+      const totalDingin = lots.reduce((sum, l) => sum + (parseFloat(l.dingin) || 0), 0);
+      if (kpiStok) {
+        kpiStok.textContent = `${LotStore.f(totalDingin, 0)} kg`;
+      }
+
+      if (!tbody) return;
+
+      // Filter lot yang sudah masuk tahap pemotongan (ada bobot karkas basah)
+      const chillingLots = lots.filter(l => l.basah != null && l.basah > 0);
+
+      if (!chillingLots.length) {
+        tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:24px;color:var(--mute);">Belum ada karkas yang masuk ke tahap chilling hari ini.</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = chillingLots.map(l => {
+        let dinginStr = '–';
+        let selisihStr = '–';
+        let karakterStr = 'Dalam Perendaman Chiller (0°C s/d 4°C)';
+        let yieldStr = '–';
+        let statusBadge = '';
+        let aksiBtn = '';
+
+        if (l.dingin != null && l.dingin > 0) {
+          dinginStr = `${LotStore.f(l.dingin, 0)} kg`;
+          const diffKg = l.dingin - l.basah;
+          const diffPct = (diffKg / l.basah * 100);
+          const isGain = diffKg >= 0;
+
+          selisihStr = `<span class="${isGain ? 'pos' : 'neg'}" style="font-weight:600;">
+            ${isGain ? '+' : ''}${LotStore.f(diffKg, 0)} kg (${isGain ? '+' : ''}${diffPct.toFixed(2)}%)
+          </span>`;
+
+          karakterStr = isGain
+            ? 'Penyerapan Air Dingin (Water Pickup Normal)'
+            : 'Penyusutan Suhu Dingin (Cold Shrinkage)';
+
+          const yieldPct = (l.dingin / l.kirim * 100);
+          yieldStr = `<span class="pos" style="font-weight:700;">${yieldPct.toFixed(2)}%</span>`;
+
+          statusBadge = `<span class="badge badge-success">Selesai Chilling</span>`;
+          aksiBtn = `
+            <div style="display:flex;gap:6px;align-items:center;justify-content:center;">
+              <a href="timbang-susut.html?lot=${l.id}" class="btn btn-sm">Lihat Hasil</a>
+              <a href="produksi.html?lot=${l.id}&action=cut" class="btn btn-primary btn-sm">
+                Proses Cutting
+              </a>
+            </div>
+          `;
+        } else {
+          statusBadge = `<span class="badge badge-warning">Sedang Chilling</span>`;
+          aksiBtn = `<a href="timbang-susut.html?lot=${l.id}&stage=dingin" class="btn btn-primary btn-sm">
+            Timbang Dingin
+          </a>`;
+        }
+
+        return `
+          <tr>
+            <td class="text-left"><code style="font-weight:700;color:var(--ink);">${l.id}</code></td>
+            <td class="text-left" style="font-weight:600;color:var(--ink);">${l.nama}</td>
+            <td class="text-right" style="font-weight:600;">${LotStore.f(l.basah, 0)} kg</td>
+            <td class="text-right" style="font-weight:600;">${dinginStr}</td>
+            <td class="text-right">${selisihStr}</td>
+            <td class="text-left" style="font-size:12.5px;color:var(--ink-secondary);">${karakterStr}</td>
+            <td class="text-right">${yieldStr}</td>
+            <td class="text-center">${statusBadge}</td>
+            <td class="text-center">${aksiBtn}</td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      initColdStorage();
+    });
+  </script>
+</body>
+</html>

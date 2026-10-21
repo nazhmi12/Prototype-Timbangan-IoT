@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Log Aktivitas &amp; Audit Trail – Sistem Timbang RPHU</title>
+  <link rel="stylesheet" href="../assets/css/main.css?v=20261014_role">
+  <link rel="stylesheet" href="../assets/css/dashboard.css?v=20261014_role">
+  <link rel="stylesheet" href="../assets/css/responsive.css?v=20261014_role">
+  <style>
+    .log-badge-action {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 8px;
+      border-radius: var(--radius-sm);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.3px;
+      text-transform: uppercase;
+      font-family: var(--font-mono);
+    }
+    .action-login { background: #e0f2fe; color: #0284c7; border: 1px solid #bae6fd; }
+    .action-weighing_recorded { background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; }
+    .action-weighing_corrected { background: #fef3c7; color: #b45309; border: 1px solid #fde68a; }
+    .action-weighing_deleted { background: #fee2e2; color: #b91c1c; border: 1px solid #fecaca; }
+    .action-lot_created { background: #f3e8ff; color: #7e22ce; border: 1px solid #e9d5ff; }
+    .action-user_created { background: #e0e7ff; color: #4338ca; border: 1px solid #c7d2fe; }
+    .action-user_deleted { background: #ffe4e6; color: #be123c; border: 1px solid #fecdd3; }
+    .action-farmer_created { background: #ccfbf1; color: #0f766e; border: 1px solid #99f6e4; }
+    .action-security_check { background: #ffedd5; color: #c2410c; border: 1px solid #fed7aa; }
+
+    .filter-bar-log {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      background: var(--panel);
+      padding: 14px 18px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-sm);
+      margin-bottom: 20px;
+    }
+    .filter-bar-log .search-input {
+      flex: 1;
+      min-width: 240px;
+    }
+    .filter-select {
+      height: 38px;
+      padding: 0 10px;
+      border: 1px solid var(--line-strong);
+      border-radius: var(--radius-sm);
+      background: var(--panel);
+      color: var(--ink);
+      font-size: 13px;
+      outline: none;
+    }
+    .filter-select:focus {
+      border-color: var(--blue);
+    }
+  </style>
+</head>
+<body>
+  <!-- Top brand bar -->
+  <div class="top-strip"></div>
+  <header class="hdr">
+    <div class="brand">
+      <div class="brand-logo-badge">RPHU</div>
+      <div class="brand-text">
+        <b>RPHU MODERN</b>
+        <small>Smart Poultry System</small>
+      </div>
+      <div class="sys-title">
+        Sistem Timbang &amp; Susut
+        <span class="sys-badge">Audit Trail</span>
+      </div>
+    </div>
+    <div class="header-status">
+      <div class="station-pill">
+        <span class="pulse-live"></span>
+        <span id="currentStationLabel">Audit &amp; Keamanan</span>
+      </div>
+      <div class="seg-toggle" role="group" aria-label="Mode tampilan">
+        <button data-m="light" aria-pressed="false" type="button">Terang</button>
+        <button data-m="dark" aria-pressed="false" type="button">Gelap</button>
+      </div>
+
+      <div class="header-right-corner">
+        <div class="header-datetime" title="Waktu Sistem Operasional">
+          <span id="tgl"></span>
+        </div>
+        <div class="user-profile">
+          <span class="user-name" id="currentUserLabel">Memuat user...</span>
+          <button class="btn-logout" id="btnLogout" type="button">Keluar</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="app-container">
+    <aside class="sidebar">
+      <nav aria-label="Menu Navigasi">
+        <div class="nav-section-title">Operasional</div>
+        <a href="penerimaan-ayam.html">
+          <span>Penerimaan ayam</span>
+        </a>
+        <a href="timbang-susut.html">
+          <span>Timbang &amp; susut</span>
+        </a>
+        <a href="produksi.html">
+          <span>Produksi</span>
+        </a>
+        <a href="cold-storage.html">
+          <span>Stok cold storage</span>
+        </a>
+        <a href="penjualan.html">
+          <span>Penjualan</span>
+        </a>
+
+        <div class="nav-section-title">Data &amp; Laporan</div>
+        <a href="dashboard.html">
+          <span>Dashboard KPI</span>
+        </a>
+        <a href="peternak.html">
+          <span>Peternak</span>
+        </a>
+        <a href="laporan.html">
+          <span>Laporan</span>
+        </a>
+
+        <div class="nav-section-title">Administrasi &amp; Audit</div>
+        <a href="users.html">
+          <span>Manajemen User</span>
+        </a>
+        <a href="log-aktivitas.html" class="active">
+          <span>Log Aktivitas</span>
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <p><b>Audit Trail &amp; Keamanan</b><br>
+        Sistem Timbang &amp; Susut<br>
+        RPHU Modern Automation</p>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <div class="crumb">Beranda / Administrasi &amp; Audit / Log Aktivitas Sistem</div>
+      <div class="page-header">
+        <div>
+          <h2 class="page-title">Log Aktivitas &amp; Audit Trail Operasional</h2>
+          <p style="color:var(--mute);font-size:13px;margin:2px 0 0 0;">
+            Rekam jejak otomatis transaksi timbang, otorisasi koreksi deviasi, dan mutasi data pengguna.
+          </p>
+        </div>
+        <div class="page-actions" style="display:flex;align-items:center;gap:10px;">
+          <button class="btn btn-secondary btn-sm" id="btnRefreshLogs" type="button">
+            Muat Ulang
+          </button>
+          <button class="btn btn-primary btn-sm" id="btnExportCsv" type="button">
+            Ekspor CSV
+          </button>
+        </div>
+      </div>
+
+      <!-- KPI Summary Cards -->
+      <div class="kpi-row" style="margin-bottom:20px;">
+        <div class="kpi-card">
+          <div class="kpi-card-label">Total Aktivitas Tercatat</div>
+          <div class="kpi-card-value" id="kpiTotalLogs">0 Event</div>
+          <div class="kpi-card-sub">
+            <span class="kpi-badge">Audit</span>
+            <span>Tersimpan di SQLite</span>
+          </div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-card-label">Transaksi Penimbangan</div>
+          <div class="kpi-card-value" id="kpiWeighingLogs">0 Timbang</div>
+          <div class="kpi-card-sub">
+            <span class="kpi-badge kpi-badge-good">Penimbangan</span>
+            <span>Hidup, basah, chilling</span>
+          </div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-card-label">Koreksi &amp; Pembatalan</div>
+          <div class="kpi-card-value" id="kpiCorrectionLogs">0 Koreksi</div>
+          <div class="kpi-card-sub">
+            <span class="kpi-badge kpi-badge-alert">Koreksi</span>
+            <span>Otorisasi Supervisor</span>
+          </div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-card-label">Integritas Audit</div>
+          <div class="kpi-card-value" id="kpiSecurityStatus">100% Valid</div>
+          <div class="kpi-card-sub">
+            <span class="kpi-badge kpi-badge-normal">Terproteksi</span>
+            <span>Anti-Tampering Aktif</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Filter Bar -->
+      <div class="filter-bar-log">
+        <input type="text" id="searchLog" class="search-input" placeholder="Cari nama petugas, aksi, nomor lot, atau catatan...">
+        
+        <select id="filterAction" class="filter-select">
+          <option value="all">Semua Tipe Aksi</option>
+          <option value="WEIGHING_RECORDED">Penimbangan (Timbang Baru)</option>
+          <option value="WEIGHING_CORRECTED">Koreksi Bobot Timbang</option>
+          <option value="WEIGHING_DELETED">Penghapusan Transaksi</option>
+          <option value="LOT_CREATED">Penerimaan Truk (Lot Baru)</option>
+          <option value="USER_CREATED">Pendaftaran Pengguna Baru</option>
+          <option value="USER_DELETED">Penghapusan Pengguna</option>
+          <option value="LOGIN">Sesi Masuk Petugas (Login)</option>
+          <option value="SECURITY_CHECK">Pemeriksaan Proteksi Keamanan</option>
+        </select>
+
+        <select id="filterRole" class="filter-select">
+          <option value="all">Semua Peran Petugas</option>
+          <option value="super_admin">Super Admin</option>
+          <option value="admin">Supervisor / Admin</option>
+          <option value="operator">Operator Timbang</option>
+        </select>
+      </div>
+
+      <!-- Table Section -->
+      <section class="box">
+        <div class="box-header">
+          <span>Riwayat Kronologis Audit Trail</span>
+          <span style="font-size:12px;opacity:0.85;" id="logCountLabel">Memuat log...</span>
+        </div>
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th class="text-center" style="width:50px;">#</th>
+                <th class="text-left" style="width:160px;">Waktu &amp; Tanggal</th>
+                <th class="text-left" style="width:190px;">Pengguna / Petugas</th>
+                <th class="text-center" style="width:110px;">Peran</th>
+                <th class="text-center" style="width:160px;">Tipe Aksi</th>
+                <th class="text-left" style="width:130px;">Target Modul</th>
+                <th class="text-left">Rincian Aktivitas / Keterangan</th>
+                <th class="text-center" style="width:120px;">Alamat IP</th>
+              </tr>
+            </thead>
+            <tbody id="logTableBody">
+              <tr>
+                <td colspan="8" style="text-align:center;padding:32px;color:var(--mute);">Memuat data log aktivitas dari database...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="../assets/js/api.js"></script>
+  <script src="../assets/js/auth.js"></script>
+  <script src="../assets/js/app.js?v=20261014_role"></script>
+  <script>
+    let allLogs = [];
+
+    async function fetchLogs() {
+      const tbody = document.getElementById('logTableBody');
+      try {
+        const res = await API.get('/api/v1/logs');
+        if (res && res.success && res.data) {
+          allLogs = res.data;
+          renderLogs();
+          updateKPIs();
+        } else {
+          tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:24px;color:var(--mute);">Belum ada catatan log aktivitas di database.</td></tr>';
+        }
+      } catch (err) {
+        console.error('Error fetching logs', err);
+        tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:24px;color:var(--red);">Gagal mengambil data log dari server backend.</td></tr>';
+      }
+    }
+
+    function renderLogs() {
+      const q = document.getElementById('searchLog').value.toLowerCase().trim();
+      const actionFilter = document.getElementById('filterAction').value;
+      const roleFilter = document.getElementById('filterRole').value;
+
+      const filtered = allLogs.filter(l => {
+        const matchQ = !q ||
+          (l.user_name && l.user_name.toLowerCase().includes(q)) ||
+          (l.action_type && l.action_type.toLowerCase().includes(q)) ||
+          (l.target_id && l.target_id.toLowerCase().includes(q)) ||
+          (l.new_value && l.new_value.toLowerCase().includes(q));
+
+        const matchAction = (actionFilter === 'all') || (l.action_type === actionFilter);
+        const matchRole = (roleFilter === 'all') || (l.role === roleFilter);
+
+        return matchQ && matchAction && matchRole;
+      });
+
+      const tbody = document.getElementById('logTableBody');
+      const countLabel = document.getElementById('logCountLabel');
+      countLabel.textContent = `Menampilkan ${filtered.length} dari ${allLogs.length} rekam jejak`;
+
+      if (!filtered.length) {
+        tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:32px;color:var(--mute);">Tidak ada log yang cocok dengan filter.</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = filtered.map((l, idx) => {
+        let actionBadge = `<span class="log-badge-action action-${(l.action_type || '').toLowerCase()}">${formatActionName(l.action_type)}</span>`;
+
+        let roleBadge = '';
+        if (l.role === 'super_admin') {
+          roleBadge = '<span class="role-badge role-super-admin" style="font-size:10.5px;">Super Admin</span>';
+        } else if (l.role === 'admin') {
+          roleBadge = '<span class="role-badge role-admin" style="font-size:10.5px;">Supervisor</span>';
+        } else {
+          roleBadge = '<span class="role-badge role-operator" style="font-size:10.5px;">Operator</span>';
+        }
+
+        let detailText = l.new_value || '-';
+        if (l.old_value) {
+          detailText = `<span style="text-decoration:line-through;color:var(--mute);margin-right:6px;">${l.old_value}</span> <span style="color:var(--mute);">&rarr;</span> ${l.new_value}`;
+        }
+
+        return `
+          <tr>
+            <td class="text-center" style="font-weight:600;color:var(--mute);">${idx + 1}</td>
+            <td class="text-left" style="font-family:var(--font-mono);font-size:12px;color:var(--ink-secondary);">${l.created_at}</td>
+            <td class="text-left">
+              <div style="font-weight:700;color:var(--ink);">${l.user_name || 'Petugas'}</div>
+              <div style="font-size:11px;color:var(--mute);font-family:var(--font-mono);">ID: ${l.user_id || '-'}</div>
+            </td>
+            <td class="text-center">${roleBadge}</td>
+            <td class="text-center">${actionBadge}</td>
+            <td class="text-left"><code style="background:var(--panel-alt);border:1px solid var(--line);padding:2px 6px;border-radius:3px;font-weight:700;">${l.target_table || 'system'}/${l.target_id || '-'}</code></td>
+            <td class="text-left" style="font-size:12.5px;line-height:1.4;">${detailText}</td>
+            <td class="text-center"><span style="font-family:var(--font-mono);font-size:11.5px;color:var(--mute);">${l.ip_address || '127.0.0.1'}</span></td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function formatActionName(action) {
+      const map = {
+        'LOGIN': 'Login',
+        'WEIGHING_RECORDED': 'Timbang Live',
+        'WEIGHING_CORRECTED': 'Koreksi Timbang',
+        'WEIGHING_DELETED': 'Hapus Timbang',
+        'LOT_CREATED': 'Lot Baru',
+        'USER_CREATED': 'Tambah User',
+        'USER_DELETED': 'Hapus User',
+        'FARMER_CREATED': 'Tambah Mitra',
+        'SECURITY_CHECK': 'Proteksi SQL'
+      };
+      return map[action] || action;
+    }
+
+    function updateKPIs() {
+      const total = allLogs.length;
+      const weighings = allLogs.filter(l => l.action_type && l.action_type.startsWith('WEIGHING_RECORDED')).length;
+      const corrections = allLogs.filter(l => l.action_type && (l.action_type.includes('CORRECTED') || l.action_type.includes('DELETED'))).length;
+
+      document.getElementById('kpiTotalLogs').textContent = `${total} Event`;
+      document.getElementById('kpiWeighingLogs').textContent = `${weighings} Timbang`;
+      document.getElementById('kpiCorrectionLogs').textContent = `${corrections} Koreksi`;
+    }
+
+    // Export CSV
+    document.getElementById('btnExportCsv').onclick = () => {
+      if (!allLogs.length) {
+        alert('Tidak ada data log untuk diekspor.');
+        return;
+      }
+      let csv = 'ID,Waktu,Petugas,Peran,Aksi,Modul,Target ID,Nilai Lama,Nilai Baru,IP Address\n';
+      allLogs.forEach(l => {
+        csv += `"${l.id}","${l.created_at}","${l.user_name || ''}","${l.role || ''}","${l.action_type || ''}","${l.target_table || ''}","${l.target_id || ''}","${(l.old_value || '').replace(/"/g, '""')}","${(l.new_value || '').replace(/"/g, '""')}","${l.ip_address || ''}"\n`;
+      });
+
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.setAttribute('href', url);
+      link.setAttribute('download', `Audit_Log_RPHU_${new Date().toISOString().substring(0, 10)}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      App.toast('File CSV Log Aktivitas berhasil diunduh', 'success');
+    };
+
+    document.getElementById('btnRefreshLogs').onclick = () => {
+      fetchLogs();
+      App.toast('Log aktivitas diperbarui dari database', 'info');
+    };
+
+    document.getElementById('searchLog').oninput = renderLogs;
+    document.getElementById('filterAction').onchange = renderLogs;
+    document.getElementById('filterRole').onchange = renderLogs;
+
+    document.addEventListener('DOMContentLoaded', () => {
+      fetchLogs();
+    });
+  </script>
+</body>
+</html>

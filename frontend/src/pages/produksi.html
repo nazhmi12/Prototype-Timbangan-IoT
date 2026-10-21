@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Produksi &amp; Parting Karkas – Sistem Timbang RPHU</title>
+  <link rel="stylesheet" href="../assets/css/main.css">
+  <link rel="stylesheet" href="../assets/css/dashboard.css">
+  <link rel="stylesheet" href="../assets/css/responsive.css">
+</head>
+<body>
+  <div class="top-strip"></div>
+  <header class="hdr">
+    <div class="brand">
+      <div class="brand-logo-badge">RPHU</div>
+      <div class="brand-text">
+        <b>RPHU MODERN</b>
+        <small>Smart Poultry System</small>
+      </div>
+      <div class="sys-title">
+        Sistem Timbang dan Susut RPHU
+        <span class="sys-badge">Line Produksi &amp; Parting</span>
+      </div>
+      <div class="station-pill">
+        <span class="dot-online"></span>
+        <span>Stasiun: <b id="currentStationLabel">Produksi Karkas</b></span>
+      </div>
+    </div>
+    <div class="header-status">
+      <div class="seg-toggle" role="group" aria-label="Mode tampilan">
+        <button data-m="light" aria-pressed="false" type="button">Terang</button>
+        <button data-m="dark" aria-pressed="false" type="button">Gelap</button>
+      </div>
+
+      <!-- Pojok Kanan Atas: Tanggal/Waktu & Profil Operator -->
+      <div class="header-right-corner">
+        <div class="header-datetime" title="Waktu Sistem Operasional">
+          <span id="tgl"></span>
+        </div>
+        <div class="user-profile">
+          <span class="user-name" id="currentUserLabel">Operator Produksi</span>
+          <button class="btn-logout" id="btnLogout" type="button">Keluar</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="app-container">
+    <aside class="sidebar">
+      <nav aria-label="Menu Navigasi">
+        <div class="nav-section-title">Operasional</div>
+        <a href="penerimaan-ayam.html">Penerimaan ayam</a>
+        <a href="timbang-susut.html">Timbang &amp; susut</a>
+        <a href="produksi.html" class="active">Produksi</a>
+        <a href="cold-storage.html">Stok cold storage</a>
+        <a href="penjualan.html">Penjualan</a>
+
+        <div class="nav-section-title">Data &amp; Laporan</div>
+        <a href="dashboard.html">Dashboard KPI</a>
+        <a href="peternak.html">Peternak</a>
+        <a href="laporan.html">Laporan</a>
+
+        <div class="nav-section-title">Administrasi Sistem</div>
+        <a href="users.html">Manajemen User</a>
+        <a href="log-aktivitas.html">Log Aktivitas</a>
+      </nav>
+      <div class="sidebar-footer">
+        <p><b>Line Sembelih &amp; Parting</b><br>Sertifikasi Halal &amp; NKV</p>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <div class="crumb">Beranda / Operasional / Pemotongan &amp; Parting Karkas</div>
+      <div class="page-header">
+        <div>
+          <h2 class="page-title">Monitoring Jalur Pemotongan &amp; Parting Karkas</h2>
+          <p style="color:var(--mute);font-size:13px;margin:2px 0 0 0;">
+            Monitoring live shackle conveyor, timbang karkas basah, konversi cutting karkas, dan rendemen boneless fillet.
+          </p>
+        </div>
+        <div class="page-actions">
+          <button class="btn btn-primary" id="btnOpenCuttingModal" type="button">
+            Catat Hasil Cutting
+          </button>
+          <a href="timbang-susut.html?stage=basah" class="btn">
+            Timbang Karkas Basah
+          </a>
+        </div>
+      </div>
+
+      <!-- Overview Jalur Produksi -->
+      <div class="kpi-row" style="grid-template-columns: repeat(6, 1fr);">
+        <div class="kpi-card">
+          <div class="kpi-card-label">Kapasitas Line Sembelih</div>
+          <div class="kpi-card-value">1.500 Ekor/Jam</div>
+          <div class="kpi-card-sub">Shackle Speed: 92%</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-card-label">Suhu Air Scalder</div>
+          <div class="kpi-card-value">53.4°C</div>
+          <div class="kpi-card-sub">
+            <span class="kpi-badge kpi-badge-normal">Optimal</span>
+            <span>Soft 52-54°C</span>
+          </div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-card-label">Total Karkas Basah</div>
+          <div class="kpi-card-value" id="kpiTotalBasah">0 kg</div>
+          <div class="kpi-card-sub">
+            <span class="kpi-badge">Eviscerasi</span>
+            <span>Hari Ini</span>
+          </div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-card-label">Rata-rata Yield Basah</div>
+          <div class="kpi-card-value" id="kpiYield">70.27%</div>
+          <div class="kpi-card-sub">
+            <span class="kpi-badge kpi-badge-good">SNI</span>
+            <span>Pra-Chilling</span>
+          </div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-card-label">Total Produk Parting</div>
+          <div class="kpi-card-value" id="kpiTotalCutting">0 kg</div>
+          <div class="kpi-card-sub">
+            <span class="kpi-badge">Cutting</span>
+            <span>Siap Pack</span>
+          </div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-card-label">Total Kemasan</div>
+          <div class="kpi-card-value" id="kpiTotalPack">0 Pack</div>
+          <div class="kpi-card-sub">
+            <span class="kpi-badge">Pack</span>
+            <span>Distribusi</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tabel 1: Status Batch Pemotongan per Lot (Live dari LotStore) -->
+      <section class="box" style="margin-bottom: 24px;">
+        <div class="box-header">
+          <span>Status Batch Pemotongan &amp; Eviscerasi per Lot</span>
+          <span style="font-size:12px;opacity:0.85;">Jalur Shackle &rarr; Timbangan Karkas Basah</span>
+        </div>
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th class="text-left">Lot ID</th>
+                <th class="text-left">Peternak / Pemasok</th>
+                <th class="text-right">Ekor</th>
+                <th class="text-right">Bobot Hidup RPHU</th>
+                <th class="text-right">Karkas Basah</th>
+                <th class="text-right">Yield Basah (%)</th>
+                <th class="text-center">Status Sembelih</th>
+                <th class="text-center">Aksi Operasional</th>
+              </tr>
+            </thead>
+            <tbody id="productionLotTableBody">
+              <tr><td colspan="8" style="text-align:center;padding:24px;color:var(--mute);">Memuat data lot pemotongan...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Tabel 2: Pencatatan Parting, Cutting & Boneless Karkas -->
+      <section class="box">
+        <div class="box-header">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <span>Hasil Parting, Cutting &amp; Boneless Karkas Hari Ini</span>
+            <span class="station-pill" style="font-size:11px;">Rendemen &amp; Cutting Loss</span>
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="ProduksiUI.openCreateCuttingModal()">
+            Catat Cutting
+          </button>
+        </div>
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th class="text-left">Kode Batch</th>
+                <th class="text-left">Lot Asal</th>
+                <th class="text-left">Jenis Potongan &amp; Rincian</th>
+                <th class="text-right">Bahan Baku (kg)</th>
+                <th class="text-right">Produk Utama (kg)</th>
+                <th class="text-right">By-Product (kg)</th>
+                <th class="text-right">Cutting Loss</th>
+                <th class="text-center">Kemasan</th>
+                <th class="text-center">Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="cuttingTableBody">
+              <tr><td colspan="9" style="text-align:center;padding:24px;color:var(--mute);">Memuat data catatan parting &amp; cutting karkas...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- MODAL 1: FORM CATAT HASIL CUTTING / PARTING KARKAS -->
+  <div class="modal-backdrop" id="cuttingModal">
+    <div class="modal-dialog" style="max-width: 720px;">
+      <div class="modal-header">
+        <div>
+          <h3 style="margin:0;font-size:16px;font-weight:700;">
+            Pencatatan Hasil Parting &amp; Cutting Karkas
+          </h3>
+          <span style="font-size:12px;color:var(--mute);">Line Pemotongan Lanjutan, Boneless Fillet, dan Pengemasan</span>
+        </div>
+        <button type="button" class="btn-modal-close" onclick="ProduksiUI.closeModal('cuttingModal')">&times;</button>
+      </div>
+
+      <form id="formCuttingKarkas">
+        <div class="modal-body" style="padding:20px 24px;max-height:75vh;overflow-y:auto;">
+          <!-- Baris 1: Kode Batch & Lot Asal -->
+          <div style="display:grid;grid-template-columns:1fr 1.4fr;gap:14px;margin-bottom:14px;">
+            <div>
+              <label for="cutCode">Kode Batch Cutting</label>
+              <input type="text" id="cutCode" readonly style="background:var(--zebra);font-weight:700;font-family:var(--font-mono);">
+            </div>
+            <div>
+              <label for="cutLotId">Pilih Lot Karkas (Bahan Baku)</label>
+              <select id="cutLotId" required>
+                <!-- Diisi otomatis oleh JavaScript -->
+              </select>
+            </div>
+          </div>
+
+          <!-- Baris 2: Jenis Potongan & Bobot Bahan Baku -->
+          <div style="display:grid;grid-template-columns:1.5fr 1fr;gap:14px;margin-bottom:14px;">
+            <div>
+              <label for="cutType">Spesifikasi Jenis Potongan</label>
+              <select id="cutType" required>
+                <option value="parting_8">Parting 8 Potong (Standar Restoran / QSR)</option>
+                <option value="parting_4">Parting 4 Potong (2 Dada + 2 Paha)</option>
+                <option value="parting_10">Parting 10 Potong (Katering &amp; Horeka)</option>
+                <option value="boneless_fillet">Boneless Fillet (BLD Dada &amp; BLP Paha)</option>
+                <option value="mixed_cuts">Potongan Campur Retail (Wings, Drumstick, Paha Atas)</option>
+              </select>
+            </div>
+            <div>
+              <label for="cutInputKg">Bobot Bahan Baku Karkas (kg)</label>
+              <input type="number" id="cutInputKg" step="0.1" min="1" placeholder="500.0" required style="font-weight:700;font-size:14px;">
+            </div>
+          </div>
+
+          <!-- Rincian Output Potongan Utama -->
+          <div style="background:var(--card-bg);border:1px solid var(--border);border-radius:6px;padding:12px;margin-bottom:14px;">
+            <div style="font-size:12px;font-weight:700;color:var(--ink);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">
+              1. Rincian Output Produk Utama (kg)
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(4, 1fr);gap:10px;">
+              <div>
+                <label for="cutBld" style="font-size:12px;">Dada / BLD (kg)</label>
+                <input type="number" id="cutBld" step="0.1" min="0" placeholder="0.0">
+              </div>
+              <div>
+                <label for="cutBlp" style="font-size:12px;">Paha / BLP (kg)</label>
+                <input type="number" id="cutBlp" step="0.1" min="0" placeholder="0.0">
+              </div>
+              <div>
+                <label for="cutWings" style="font-size:12px;">Sayap / Wings (kg)</label>
+                <input type="number" id="cutWings" step="0.1" min="0" placeholder="0.0">
+              </div>
+              <div>
+                <label for="cutDrum" style="font-size:12px;">Drumstick (kg)</label>
+                <input type="number" id="cutDrum" step="0.1" min="0" placeholder="0.0">
+              </div>
+            </div>
+          </div>
+
+          <!-- Rincian Output By-Product -->
+          <div style="background:var(--card-bg);border:1px solid var(--border);border-radius:6px;padding:12px;margin-bottom:14px;">
+            <div style="font-size:12px;font-weight:700;color:var(--ink);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">
+              2. Rincian Output By-Product &amp; Tulang (kg)
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(3, 1fr);gap:10px;">
+              <div>
+                <label for="cutKerongkong" style="font-size:12px;">Kerongkong / Tulang Sup (kg)</label>
+                <input type="number" id="cutKerongkong" step="0.1" min="0" placeholder="0.0">
+              </div>
+              <div>
+                <label for="cutHatiAmpela" style="font-size:12px;">Hati &amp; Ampela (kg)</label>
+                <input type="number" id="cutHatiAmpela" step="0.1" min="0" placeholder="0.0">
+              </div>
+              <div>
+                <label for="cutKulit" style="font-size:12px;">Kulit Ayam (kg)</label>
+                <input type="number" id="cutKulit" step="0.1" min="0" placeholder="0.0">
+              </div>
+            </div>
+          </div>
+
+          <!-- Live Kalkulasi Rendemen & Cutting Loss -->
+          <div style="background:var(--zebra);padding:12px 16px;border-radius:6px;margin-bottom:14px;border:1px solid var(--border);">
+            <div style="display:grid;grid-template-columns:repeat(4, 1fr);gap:10px;text-align:center;">
+              <div>
+                <div style="font-size:11px;color:var(--mute);">Total Produk Utama</div>
+                <div style="font-size:15px;font-weight:700;color:var(--green);" id="calcOutputMain">0.0 kg</div>
+              </div>
+              <div>
+                <div style="font-size:11px;color:var(--mute);">Total By-Product</div>
+                <div style="font-size:15px;font-weight:700;" id="calcOutputBy">0.0 kg</div>
+              </div>
+              <div>
+                <div style="font-size:11px;color:var(--mute);">Cutting Loss (Susut)</div>
+                <div style="font-size:15px;font-weight:700;" id="calcLoss">0.0 kg (0.00%)</div>
+              </div>
+              <div>
+                <div style="font-size:11px;color:var(--mute);">Rendemen Bersih</div>
+                <div style="font-size:15px;font-weight:700;color:var(--blue);" id="calcYield">0.00%</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Parameter Tambahan: Kemasan & Suhu Ruang -->
+          <div style="display:grid;grid-template-columns:1fr 1fr 1.5fr;gap:14px;">
+            <div>
+              <label for="cutPackageCount">Jumlah Pack / Kemasan</label>
+              <input type="number" id="cutPackageCount" placeholder="50" min="1" required>
+            </div>
+            <div>
+              <label for="cutRoomTemp">Suhu Ruang Parting (°C)</label>
+              <input type="number" id="cutRoomTemp" value="12.0" step="0.1" max="15.0" required title="Standar HACCP / NKV Ruang Parting: Maksimal 15.0°C">
+            </div>
+            <div>
+              <label for="cutNotes">Catatan Produksi</label>
+              <input type="text" id="cutNotes" placeholder="Contoh: Sesuai spesifikasi order Horeka">
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer" style="padding:14px 24px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:10px;">
+          <button type="button" class="btn" onclick="ProduksiUI.closeModal('cuttingModal')">Batal</button>
+          <button type="submit" class="btn btn-primary">
+            Simpan Hasil Cutting
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL 2: RINCIAN DETAIL BATCH CUTTING -->
+  <div class="modal-backdrop" id="detailCuttingModal">
+    <div class="modal-dialog" style="max-width: 600px;">
+      <div class="modal-header">
+        <h3 style="margin:0;font-size:16px;font-weight:700;">Rincian Batch Pemotongan &amp; Cutting</h3>
+        <button type="button" class="btn-modal-close" onclick="ProduksiUI.closeModal('detailCuttingModal')">&times;</button>
+      </div>
+      <div class="modal-body" id="detailCuttingContent" style="padding:20px 24px;">
+        <!-- Diisi dinamis oleh JavaScript -->
+      </div>
+      <div class="modal-footer" style="padding:12px 24px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;">
+        <button type="button" class="btn" onclick="ProduksiUI.closeModal('detailCuttingModal')">Tutup</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 3: CETAK LABEL KEMASAN / BARCODE -->
+  <div class="modal-backdrop" id="labelModal">
+    <div class="modal-dialog" style="max-width: 460px;">
+      <div class="modal-header">
+        <h3 style="margin:0;font-size:15px;font-weight:700;">Label Kemasan &amp; Barcode Karkas</h3>
+        <button type="button" class="btn-modal-close" onclick="ProduksiUI.closeModal('labelModal')">&times;</button>
+      </div>
+      <div class="modal-body" style="padding:20px;">
+        <div id="labelPrintContainer">
+          <!-- Label HTML dimasukkan di sini -->
+        </div>
+      </div>
+      <div class="modal-footer" style="padding:12px 20px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;">
+        <span style="font-size:12px;color:var(--mute);">Format Standar Thermal / Sticker Label</span>
+        <div style="display:flex;gap:8px;">
+          <button type="button" class="btn" onclick="ProduksiUI.closeModal('labelModal')">Tutup</button>
+          <button type="button" class="btn btn-primary" onclick="ProduksiUI.printLabelContent()">
+            Cetak Label
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="../assets/js/api.js"></script>
+  <script src="../assets/js/auth.js"></script>
+  <script src="../assets/js/lot.js"></script>
+  <script src="../assets/js/produksi.js"></script>
+  <script src="../assets/js/app.js"></script>
+</body>
+</html>

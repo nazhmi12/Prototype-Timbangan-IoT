@@ -1,0 +1,42 @@
+<!-- Reusable Header Component for Sistem Timbang RPHU -->
+<div class="top-strip"></div>
+<header class="hdr">
+  <div class="brand">
+    <div class="brand-logo-badge">
+      <span>RPHU</span>
+    </div>
+    <div class="brand-text">
+      <b>RPHU MODERN</b>
+      <small>Smart Poultry System</small>
+    </div>
+    <div class="sys-title">
+      Sistem Timbang &amp; Susut
+      <span class="sys-badge">IoT Live</span>
+    </div>
+    <div class="station-pill">
+      <span class="dot-online" title="Online via MQTT &amp; FreeRTOS"></span>
+      <span id="currentStationLabel">Timbang 1</span>
+    </div>
+  </div>
+
+  <div class="header-status">
+
+    <!-- Theme Switcher -->
+    <div class="seg-toggle" role="group" aria-label="Mode tampilan">
+      <button data-m="light" aria-pressed="false" type="button">Terang</button>
+      <button data-m="dark" aria-pressed="false" type="button">Gelap</button>
+    </div>
+
+    <!-- Pojok Kanan Atas: Tanggal/Waktu & Profil Operator -->
+    <div class="header-right-corner">
+      <div class="header-datetime" title="Waktu Sistem Operasional">
+        <span id="tgl"></span>
+      </div>
+
+      <div class="user-profile">
+        <span class="user-name" id="currentUserLabel">Operator</span>
+        <button class="btn-logout" id="btnLogout" type="button" title="Keluar dari sistem">Keluar</button>
+      </div>
+    </div>
+  </div>
+</header>

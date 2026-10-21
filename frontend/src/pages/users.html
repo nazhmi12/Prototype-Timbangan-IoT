@@ -1,0 +1,862 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Manajemen Pengguna – Sistem Timbang RPHU</title>
+  <link rel="stylesheet" href="../assets/css/main.css?v=20261013_corner">
+  <link rel="stylesheet" href="../assets/css/dashboard.css?v=20261013_corner">
+  <link rel="stylesheet" href="../assets/css/responsive.css?v=20261013_corner">
+  <style>
+    .role-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 3px 9px;
+      border-radius: var(--radius-sm);
+      font-size: 11.5px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+    }
+    .role-super-admin {
+      background: #ffe4e6;
+      color: #be123c;
+      border: 1px solid #fecdd3;
+    }
+    .role-admin {
+      background: #e0f2fe;
+      color: #0369a1;
+      border: 1px solid #bae6fd;
+    }
+    .role-operator {
+      background: #dcfce7;
+      color: #15803d;
+      border: 1px solid #bbf7d0;
+    }
+    .badge-protected {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: #f1f5f9;
+      color: #475569;
+      border: 1px solid #cbd5e1;
+      padding: 4px 10px;
+      border-radius: var(--radius-sm);
+      font-size: 11.5px;
+      font-weight: 600;
+    }
+    .badge-status-active {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 12px;
+      color: var(--green);
+      font-weight: 600;
+    }
+    .badge-status-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--green);
+    }
+
+    /* Modal Form Centering & Executive Styling */
+    .modal-dialog-user {
+      max-width: 580px;
+      width: 100%;
+      border-radius: var(--radius-md);
+      box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.45);
+      border: 1px solid var(--line-strong);
+      border-top: 4px solid var(--blue);
+      overflow: hidden;
+      transition: border-color 0.25s ease;
+    }
+    .modal-dialog-user.role-super_admin {
+      border-top-color: #e11d48;
+    }
+    .modal-dialog-user.role-admin {
+      border-top-color: #0284c7;
+    }
+    .modal-dialog-user.role-operator {
+      border-top-color: #10b981;
+    }
+
+    .form-section-title {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      color: var(--mute);
+      margin: 16px 0 10px 0;
+      padding-bottom: 5px;
+      border-bottom: 1px dashed var(--line);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .form-section-title:first-child {
+      margin-top: 0;
+    }
+
+    .input-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+    .input-wrapper input {
+      width: 100%;
+    }
+    .input-prefix-icon {
+      position: absolute;
+      left: 10px;
+      color: var(--mute);
+      pointer-events: none;
+      display: flex;
+      align-items: center;
+    }
+    .input-has-prefix {
+      padding-left: 34px !important;
+    }
+    .input-btn-toggle {
+      position: absolute;
+      right: 8px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--mute);
+      padding: 4px;
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      transition: color 0.15s;
+    }
+    .input-btn-toggle:hover {
+      color: var(--ink);
+    }
+
+    .role-explainer-card {
+      margin-top: 12px;
+      padding: 12px 14px;
+      border-radius: 6px;
+      font-size: 12px;
+      line-height: 1.5;
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      transition: all 0.2s ease;
+    }
+    .role-explainer-card.operator {
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      color: #166534;
+    }
+    .role-explainer-card.admin {
+      background: #f0f9ff;
+      border: 1px solid #bae6fd;
+      color: #075985;
+    }
+    .role-explainer-card.super_admin {
+      background: #fff1f2;
+      border: 1px solid #fecdd3;
+      color: #9f1239;
+    }
+    .role-explainer-card svg {
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+  </style>
+</head>
+<body>
+  <div class="top-strip"></div>
+  <header class="hdr">
+    <div class="brand">
+      <div class="brand-logo-badge">RPHU</div>
+      <div class="brand-text">
+        <b>RPHU MODERN</b>
+        <small>Smart Poultry System</small>
+      </div>
+      <div class="sys-title">
+        Sistem Timbang dan Susut RPHU
+        <span class="sys-badge">Administrasi</span>
+      </div>
+      <div class="station-pill">
+        <span class="dot-online"></span>
+        <span>Stasiun: <b id="currentStationLabel">Kantor Pusat</b></span>
+      </div>
+    </div>
+    <div class="header-status">
+      <div class="seg-toggle" role="group" aria-label="Mode tampilan">
+        <button data-m="light" aria-pressed="false" type="button">Terang</button>
+        <button data-m="dark" aria-pressed="false" type="button">Gelap</button>
+      </div>
+
+      <!-- Pojok Kanan Atas: Tanggal/Waktu & Profil Operator -->
+      <div class="header-right-corner">
+        <div class="header-datetime" title="Waktu Sistem Operasional">
+          <span id="tgl"></span>
+        </div>
+        <div class="user-profile">
+          <span class="user-name" id="currentUserLabel">Super Admin</span>
+          <button class="btn-logout" id="btnLogout" type="button">Keluar</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="app-container">
+    <aside class="sidebar">
+      <nav aria-label="Menu Navigasi">
+        <div class="nav-section-title">Operasional</div>
+        <a href="penerimaan-ayam.html">
+          <span>Penerimaan ayam</span>
+        </a>
+        <a href="timbang-susut.html">
+          <span>Timbang &amp; susut</span>
+        </a>
+        <a href="produksi.html">
+          <span>Produksi</span>
+        </a>
+        <a href="cold-storage.html">
+          <span>Stok cold storage</span>
+        </a>
+        <a href="penjualan.html">
+          <span>Penjualan</span>
+        </a>
+
+        <div class="nav-section-title">Data &amp; Laporan</div>
+        <a href="dashboard.html">
+          <span>Dashboard KPI</span>
+        </a>
+        <a href="peternak.html">
+          <span>Peternak</span>
+        </a>
+        <a href="laporan.html">
+          <span>Laporan</span>
+        </a>
+
+        <div class="nav-section-title">Administrasi Sistem</div>
+        <a href="users.html" class="active">
+          <span>Manajemen User</span>
+        </a>
+        <a href="log-aktivitas.html">
+          <span>Log Aktivitas</span>
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <p><b>RPHU Security &amp; Access</b><br>Role Based Access Control (RBAC)<br>Super Admin Immutable</p>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <div class="crumb">Beranda / Administrasi Sistem / Manajemen Pengguna</div>
+      <div class="page-header">
+        <div>
+          <h2 class="page-title">Manajemen Akun &amp; Hak Akses Pengguna</h2>
+          <p style="font-size:13px;color:var(--mute);margin-top:2px;">
+            Kelola petugas operasional, hak akses stasiun, dan proteksi integritas Super Admin
+          </p>
+        </div>
+        <div class="page-actions">
+          <button class="btn btn-primary" id="btnOpenAddUser" type="button">
+            Tambah Pengguna Baru
+          </button>
+        </div>
+      </div>
+
+      <!-- Quick KPI Cards for Users -->
+      <div class="kpi-row">
+        <div class="kpi-card">
+          <div class="kpi-card-label">Total Pengguna Terdaftar</div>
+          <div class="kpi-card-value" id="kpiTotalUsers">4 User</div>
+          <div class="kpi-card-sub">
+            <span class="kpi-badge">Sistem</span>
+            <span>Semua peran aktif</span>
+          </div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-card-label">Super Admin</div>
+          <div class="kpi-card-value" id="kpiSuperAdmin">1 Akun</div>
+          <div class="kpi-card-sub">
+            <span class="kpi-badge kpi-badge-alert">Anti-Delete</span>
+            <span>Direksi / IT Pusat</span>
+          </div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-card-label">Supervisor / Admin</div>
+          <div class="kpi-card-value" id="kpiAdminUsers">1 Akun</div>
+          <div class="kpi-card-sub">
+            <span class="kpi-badge kpi-badge-good">Supervisor</span>
+            <span>Pengawas Operasional</span>
+          </div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-card-label">Operator Timbang</div>
+          <div class="kpi-card-value" id="kpiOperators">2 Petugas</div>
+          <div class="kpi-card-sub">
+            <span class="kpi-badge kpi-badge-normal">Lapangan</span>
+            <span>Stasiun Timbang Live</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Box Tabel Pengguna -->
+      <section class="box">
+        <div class="box-header" style="flex-wrap:wrap;gap:12px;">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <span style="font-weight:700;">Daftar Akun Pengguna Sistem RPHU</span>
+            <span class="station-pill" style="font-size:11px;">Proteksi Database Aktif</span>
+          </div>
+          <div class="search-input-wrapper">
+            <input type="text" id="searchUser" placeholder="Cari ID, nama, atau peran..." autocomplete="off">
+          </div>
+        </div>
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th class="text-center" style="width:50px;">No</th>
+                <th class="text-left" style="width:140px;">User ID</th>
+                <th class="text-left">Nama Lengkap</th>
+                <th class="text-center" style="width:130px;">Peran (Role)</th>
+                <th class="text-left" style="width:160px;">Stasiun Penugasan</th>
+                <th class="text-center" style="width:100px;">Status</th>
+                <th class="text-left" style="width:120px;">Terdaftar</th>
+                <th class="text-center" style="width:140px;">Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="userTableBody">
+              <tr><td colspan="8" style="text-align:center;padding:24px;">Memuat data pengguna...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- MODAL TAMBAH PENGGUNA BARU (CENTERED INDUSTRIAL DIALOG) -->
+  <div class="modal-backdrop" id="modalAddUser" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal-dialog modal-dialog-user" id="modalDialogUser">
+      <div class="modal-header">
+        <div>
+          <div style="font-size:10.5px;font-weight:700;letter-spacing:0.7px;text-transform:uppercase;color:var(--blue);margin-bottom:2px;">
+            Sistem Keamanan &amp; Otorisasi RPHU
+          </div>
+          <h3 class="modal-title" id="modalTitle">
+            Tambah Pengguna Sistem Baru
+          </h3>
+        </div>
+        <button class="modal-close" id="btnCloseModal" type="button" aria-label="Tutup modal">&times;</button>
+      </div>
+
+      <form id="formAddUser">
+        <div class="modal-body" style="padding:18px 22px;">
+
+          <div class="form-section-title">
+            Profil &amp; Identitas Pegawai
+          </div>
+
+          <div class="form-group">
+            <label for="newFullName">Nama Lengkap &amp; Gelar <span style="color:var(--red)">*</span></label>
+            <input type="text" id="newFullName" placeholder="Contoh: Ir. Ahmad Pratama, S.Pt" required autocomplete="off">
+            <small style="color:var(--mute);font-size:11px;margin-top:4px;display:block;">Nama lengkap yang dicetak pada tiket timbang dan laporan resmi.</small>
+          </div>
+
+          <div class="form-grid-2">
+            <div class="form-group">
+              <label for="newUserId">User ID (Akun Login) <span style="color:var(--red)">*</span></label>
+              <input type="text" id="newUserId" placeholder="Contoh: operator_03" required autocomplete="off" style="font-family:var(--font-mono);font-size:13px;">
+              <small style="color:var(--mute);font-size:11px;margin-top:4px;display:block;">Gunakan huruf kecil atau angka.</small>
+            </div>
+
+            <div class="form-group">
+              <label for="newPassword">Kata Sandi Awal <span style="color:var(--red)">*</span></label>
+              <div style="display:flex;gap:6px;">
+                <input type="password" id="newPassword" placeholder="Minimal 6 karakter" required style="flex:1;">
+                <button type="button" id="btnTogglePassword" class="btn btn-secondary btn-sm" style="font-size:12px;padding:0 12px;" title="Tampilkan sandi">Lihat</button>
+              </div>
+              <small style="color:var(--mute);font-size:11px;margin-top:4px;display:block;">Minimal 6 karakter alfanumerik.</small>
+            </div>
+          </div>
+
+          <div class="form-section-title">
+            Hak Akses &amp; Penugasan Stasiun
+          </div>
+
+          <div class="form-grid-2">
+            <div class="form-group">
+              <label for="newRole">Peran (Role Sistem) <span style="color:var(--red)">*</span></label>
+              <select id="newRole" required style="font-weight:600;">
+                <option value="operator" selected>Operator (Stasiun Timbang)</option>
+                <option value="admin">Admin User (Data &amp; Laporan)</option>
+                <option value="super_admin">Super Admin (Akses Penuh &amp; Terlindungi)</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="newStation">Stasiun Penugasan Default</label>
+              <select id="newStation">
+                <option value="Timbang 1">Timbang 1 (Penerimaan)</option>
+                <option value="Timbang karkas">Timbang karkas</option>
+                <option value="Cold storage">Cold storage</option>
+                <option value="Kantor Operasional RPHU">Kantor Operasional RPHU</option>
+                <option value="Kantor Pusat / Direksi">Kantor Pusat / Direksi</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Dynamic Role Explainer Card -->
+          <div id="roleExplainer" class="role-explainer-card operator">
+            <div>
+              <b style="color:#15803d;">Peran Operator Timbang:</b><br>
+              Akses khusus stasiun operasional: pencatatan berat ayam hidup, karkas basah, dan karkas dingin, membaca telemetri IoT (ESP32-HX711), dan cetak tiket timbang.
+            </div>
+          </div>
+
+          <div id="addUserAlert" style="display:none;margin-top:14px;padding:10px 12px;background:#fff1f2;border:1px solid #fecdd3;border-radius:6px;color:#be123c;font-size:12px;line-height:1.4;"></div>
+
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn" id="btnCancelModal" style="padding:8px 16px;">Batal</button>
+          <button type="submit" class="btn btn-primary" id="btnSaveUser" style="padding:8px 20px;">
+            <span>Simpan Pengguna</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL KONFIRMASI HAPUS PENGGUNA (CUSTOM INDUSTRIAL MODAL, NO NATIVE POPUP BUGS) -->
+  <div class="modal-backdrop" id="modalDeleteUser" role="dialog" aria-modal="true" aria-labelledby="modalDelTitle">
+    <div class="modal-dialog modal-danger" style="max-width: 480px;">
+      <div class="modal-header">
+        <div>
+          <div style="font-size:10.5px;font-weight:700;letter-spacing:0.7px;text-transform:uppercase;color:var(--red);margin-bottom:2px;">
+            Konfirmasi Penghapusan Akun
+          </div>
+          <h3 class="modal-title" id="modalDelTitle">
+            Hapus Pengguna Sistem
+          </h3>
+        </div>
+        <button class="modal-close" id="btnCloseDelModal" type="button" aria-label="Tutup modal">&times;</button>
+      </div>
+
+      <div class="modal-body" style="padding:20px;">
+        <p style="margin:0 0 16px 0;font-size:13px;color:var(--ink-secondary);line-height:1.5;">
+          Apakah Anda yakin ingin menghapus akun pengguna berikut dari database? Tindakan ini <b>tidak dapat dibatalkan</b>.
+        </p>
+
+        <div style="background:var(--panel-alt);border:1px solid var(--line);border-radius:6px;padding:14px;font-size:13px;display:flex;flex-direction:column;gap:8px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <span style="color:var(--mute);font-size:12px;">User ID:</span>
+            <code id="delUserIdLabel" style="background:var(--panel);border:1px solid var(--line);padding:2px 8px;border-radius:3px;font-weight:700;color:var(--ink);">-</code>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <span style="color:var(--mute);font-size:12px;">Nama Lengkap:</span>
+            <b id="delFullNameLabel" style="color:var(--ink);">-</b>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <span style="color:var(--mute);font-size:12px;">Peran (Role):</span>
+            <span id="delRoleLabel">-</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <span style="color:var(--mute);font-size:12px;">Stasiun Default:</span>
+            <span id="delStationLabel" style="color:var(--ink-secondary);">-</span>
+          </div>
+        </div>
+
+        <div id="delModalAlert" style="display:none;margin-top:14px;padding:10px 12px;background:#fff1f2;border:1px solid #fecdd3;border-radius:6px;color:#be123c;font-size:12px;line-height:1.4;">
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn" id="btnCancelDelModal" style="padding:8px 16px;">Batal</button>
+        <button type="button" class="btn btn-primary" id="btnConfirmDelete" style="background:#dc2626;border-color:#b91c1c;padding:8px 20px;">
+          <span>Ya, Hapus Pengguna</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script src="../assets/js/api.js"></script>
+  <script src="../assets/js/auth.js"></script>
+  <script src="../assets/js/app.js?v=20261013_corner"></script>
+  <script>
+    let usersData = [];
+    let pendingDeleteUserId = null;
+    let pendingDeleteUserLabel = '';
+
+    function escapeAttr(str) {
+      if (!str) return '';
+      return String(str).replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    }
+
+    async function loadUsers() {
+      try {
+        const res = await API.get('/api/v1/users');
+        if (res && res.success && res.data) {
+          usersData = res.data;
+        } else {
+          fallbackUsers();
+        }
+      } catch (err) {
+        console.warn('API users error, using local fallback', err);
+        fallbackUsers();
+      }
+      renderUsers();
+      updateKPIs();
+    }
+
+    function fallbackUsers() {
+      usersData = [
+        { id: 1, user_id: 'superadmin', full_name: 'Ir. Budi Santoso (Super Admin)', role: 'super_admin', default_station: 'Kantor Pusat / Direksi', is_protected: true, is_active: true, created_at: '2026-10-13 08:00:00' },
+        { id: 2, user_id: 'admin_rphu', full_name: 'Siti Rahma (Admin User)', role: 'admin', default_station: 'Kantor Operasional RPHU', is_protected: false, is_active: true, created_at: '2026-10-13 08:15:00' },
+        { id: 3, user_id: 'operator_01', full_name: 'Ahmad Fauzi (Operator Timbang)', role: 'operator', default_station: 'Timbang 1', is_protected: false, is_active: true, created_at: '2026-10-13 08:30:00' },
+        { id: 4, user_id: 'petugas_01', full_name: 'Dedi Supriadi (Operator)', role: 'operator', default_station: 'Timbang 1', is_protected: false, is_active: true, created_at: '2026-10-13 08:45:00' }
+      ];
+    }
+
+    function renderUsers(filtered = null) {
+      const list = filtered || usersData;
+      const tbody = document.getElementById('userTableBody');
+      if (!list || list.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:24px;color:var(--mute);">Tidak ada data pengguna ditemukan.</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = list.map((u, idx) => {
+        let roleBadge = '';
+        if (u.role === 'super_admin') {
+          roleBadge = '<span class="role-badge role-super-admin">Super Admin</span>';
+        } else if (u.role === 'admin') {
+          roleBadge = '<span class="role-badge role-admin">Admin User</span>';
+        } else {
+          roleBadge = '<span class="role-badge role-operator">Operator</span>';
+        }
+
+        let actionCell = '';
+        // Hanya akun root utama 'superadmin' yang tidak dapat dihapus
+        if (u.user_id === 'superadmin' || (u.is_protected && u.user_id === 'superadmin')) {
+          actionCell = `<span class="badge-protected" title="Akun Super Admin Utama dilindungi sistem dan tidak dapat dihapus">
+            <span style="color:#be123c;">Anti-Delete</span>
+          </span>`;
+        } else {
+          actionCell = `
+            <div style="display:flex;justify-content:center;gap:6px;">
+              <button class="btn btn-sm" style="color:var(--red);border-color:var(--red);" onclick="openDeleteModal('${u.id}', '${u.user_id}', '${escapeAttr(u.full_name)}', '${u.role}', '${escapeAttr(u.default_station || '-')}')" type="button">
+                Hapus
+              </button>
+            </div>
+          `;
+        }
+
+        return `
+          <tr>
+            <td class="text-center" style="font-weight:600;color:var(--mute);">${idx + 1}</td>
+            <td class="text-left"><code style="background:var(--panel-alt);border:1px solid var(--line);padding:3px 6px;border-radius:3px;font-weight:700;color:var(--ink);">${u.user_id}</code></td>
+            <td class="text-left" style="font-weight:600;color:var(--ink);">${(u.full_name || '').replace(/\s*\([^)]*\)\s*$/, '')}</td>
+            <td class="text-center">${roleBadge}</td>
+            <td class="text-left" style="color:var(--ink-secondary);">${u.default_station || 'Timbang 1'}</td>
+            <td class="text-center">
+              <span class="badge-status-active">
+                <span class="badge-status-dot"></span> Aktif
+              </span>
+            </td>
+            <td class="text-left" style="color:var(--mute);font-size:12px;">${u.created_at ? u.created_at.substring(0, 10) : '-'}</td>
+            <td class="text-center">${actionCell}</td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function updateKPIs() {
+      const total = usersData.length;
+      const superAdmins = usersData.filter(u => u.role === 'super_admin').length;
+      const admins = usersData.filter(u => u.role === 'admin').length;
+      const operators = usersData.filter(u => u.role === 'operator').length;
+
+      document.getElementById('kpiTotalUsers').textContent = `${total} User`;
+      document.getElementById('kpiSuperAdmin').textContent = `${superAdmins} Akun`;
+      document.getElementById('kpiAdminUsers').textContent = `${admins} Akun`;
+      document.getElementById('kpiOperators').textContent = `${operators} Petugas`;
+    }
+
+    // Modal Konfirmasi Hapus (In-Page Industrial Modal)
+    function openDeleteModal(id, userId, fullName, role, station) {
+      pendingDeleteUserId = id;
+      pendingDeleteUserLabel = userId;
+
+      document.getElementById('delUserIdLabel').textContent = userId;
+      document.getElementById('delFullNameLabel').textContent = fullName;
+
+      let roleHtml = '<span class="role-badge role-operator">Operator</span>';
+      if (role === 'super_admin') {
+        roleHtml = '<span class="role-badge role-super-admin">Super Admin</span>';
+      } else if (role === 'admin') {
+        roleHtml = '<span class="role-badge role-admin">Admin User</span>';
+      }
+      document.getElementById('delRoleLabel').innerHTML = roleHtml;
+      document.getElementById('delStationLabel').textContent = station || 'Timbang 1';
+
+      const alertBox = document.getElementById('delModalAlert');
+      alertBox.style.display = 'none';
+      alertBox.textContent = '';
+
+      const modalDel = document.getElementById('modalDeleteUser');
+      modalDel.classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeDeleteModal() {
+      const modalDel = document.getElementById('modalDeleteUser');
+      modalDel.classList.remove('open');
+      document.body.style.overflow = '';
+      pendingDeleteUserId = null;
+      pendingDeleteUserLabel = '';
+    }
+
+    async function executeDeleteUser() {
+      if (!pendingDeleteUserId) return;
+      const btn = document.getElementById('btnConfirmDelete');
+      const alertBox = document.getElementById('delModalAlert');
+      const originalText = btn.innerHTML;
+      btn.disabled = true;
+      btn.innerHTML = '<span>Menghapus dari Database...</span>';
+      alertBox.style.display = 'none';
+
+      try {
+        const res = await API.delete(`/api/v1/users/${pendingDeleteUserId}`);
+        if (res && res.success) {
+          const uLabel = pendingDeleteUserLabel;
+          closeDeleteModal();
+          App.toast(`Pengguna '${uLabel}' berhasil dihapus dari database!`, 'success');
+          await loadUsers();
+        } else {
+          alertBox.textContent = res ? res.message : 'Gagal menghapus pengguna dari database.';
+          alertBox.style.display = 'block';
+        }
+      } catch (err) {
+        alertBox.textContent = 'Terjadi kesalahan komunikasi dengan server.';
+        alertBox.style.display = 'block';
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = originalText;
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      loadUsers();
+
+      // Modal Elements Tambah Pengguna
+      const modal = document.getElementById('modalAddUser');
+      const modalDialog = document.getElementById('modalDialogUser');
+      const roleSelect = document.getElementById('newRole');
+      const roleExplainer = document.getElementById('roleExplainer');
+      const btnTogglePwd = document.getElementById('btnTogglePassword');
+      const pwdInput = document.getElementById('newPassword');
+      const btnSaveUser = document.getElementById('btnSaveUser');
+      const addUserAlert = document.getElementById('addUserAlert');
+
+      // Modal Elements Hapus Pengguna
+      const modalDel = document.getElementById('modalDeleteUser');
+      const btnCloseDel = document.getElementById('btnCloseDelModal');
+      const btnCancelDel = document.getElementById('btnCancelDelModal');
+      const btnConfirmDel = document.getElementById('btnConfirmDelete');
+
+      btnCloseDel.onclick = closeDeleteModal;
+      btnCancelDel.onclick = closeDeleteModal;
+      btnConfirmDel.onclick = executeDeleteUser;
+
+      function openModal() {
+        document.getElementById('formAddUser').reset();
+        pwdInput.type = 'password';
+        if (addUserAlert) {
+          addUserAlert.style.display = 'none';
+          addUserAlert.textContent = '';
+        }
+
+        // Pengaturan opsi role
+        const isSuper = Auth.isSuperAdmin();
+        const optSuper = roleSelect.querySelector('option[value="super_admin"]');
+        const optAdmin = roleSelect.querySelector('option[value="admin"]');
+        const optOperator = roleSelect.querySelector('option[value="operator"]');
+
+        if (!isSuper) {
+          if (optSuper) {
+            optSuper.disabled = true;
+            optSuper.textContent = 'Super Admin (Wewenang Direksi Saja)';
+          }
+          if (optAdmin) {
+            optAdmin.disabled = false;
+            optAdmin.textContent = 'Admin User (Supervisor Operasional)';
+          }
+          roleSelect.value = 'operator';
+        } else {
+          if (optSuper) {
+            optSuper.disabled = false;
+            optSuper.textContent = 'Super Admin (Otoritas Penuh)';
+          }
+          if (optAdmin) {
+            optAdmin.disabled = false;
+            optAdmin.textContent = 'Admin User (Supervisor Operasional)';
+          }
+          roleSelect.value = 'operator';
+        }
+
+        updateRoleExplainer();
+        modal.classList.add('open');
+        document.body.style.overflow = 'hidden';
+        setTimeout(() => document.getElementById('newFullName').focus(), 80);
+      }
+
+      function closeModal() {
+        modal.classList.remove('open');
+        document.body.style.overflow = '';
+      }
+
+      document.getElementById('btnOpenAddUser').onclick = openModal;
+      document.getElementById('btnCloseModal').onclick = closeModal;
+      document.getElementById('btnCancelModal').onclick = closeModal;
+
+      // Close on backdrop click (click outside dialog)
+      modal.onclick = (e) => {
+        if (e.target === modal) closeModal();
+      };
+      modalDel.onclick = (e) => {
+        if (e.target === modalDel) closeDeleteModal();
+      };
+
+      // Close on Escape key
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+          if (modalDel.classList.contains('open')) {
+            closeDeleteModal();
+          } else if (modal.classList.contains('open')) {
+            closeModal();
+          }
+        }
+      });
+
+      // Toggle show/hide password
+      if (btnTogglePwd) {
+        btnTogglePwd.onclick = () => {
+          const isPass = pwdInput.type === 'password';
+          pwdInput.type = isPass ? 'text' : 'password';
+          btnTogglePwd.textContent = isPass ? 'Tutup' : 'Lihat';
+        };
+      }
+
+      // Dynamic Role Explainer Card
+      function updateRoleExplainer() {
+        const val = roleSelect.value;
+        modalDialog.className = `modal-dialog modal-dialog-user role-${val}`;
+        roleExplainer.className = `role-explainer-card ${val}`;
+
+        if (val === 'super_admin') {
+          roleExplainer.innerHTML = `
+            <div>
+              <b style="color:#9f1239;">Hak Istimewa Super Admin:</b><br>
+              Memiliki wewenang tertinggi mengatur akun pengguna, stasiun, dan master data operasional.
+            </div>
+          `;
+        } else if (val === 'admin') {
+          roleExplainer.innerHTML = `
+            <div>
+              <b style="color:#0369a1;">Peran Admin User:</b><br>
+              Akses penuh untuk mengelola master mitra peternak, data lot kirim, rekapitulasi susut transit, audit deviasi, serta ekspor laporan resmi.
+            </div>
+          `;
+        } else {
+          roleExplainer.innerHTML = `
+            <div>
+              <b style="color:#15803d;">Peran Operator Timbang:</b><br>
+              Akses operasional: pencatatan berat ayam hidup, karkas basah, dan karkas dingin, membaca telemetri IoT timbangan (ESP32-HX711), dan cetak tiket timbang.
+            </div>
+          `;
+        }
+      }
+
+      roleSelect.onchange = updateRoleExplainer;
+
+      // Form submit tambah pengguna
+      document.getElementById('formAddUser').onsubmit = async (e) => {
+        e.preventDefault();
+        const fullName = document.getElementById('newFullName').value.trim();
+        const userId = document.getElementById('newUserId').value.trim();
+        const role = document.getElementById('newRole').value;
+        const station = document.getElementById('newStation').value;
+        const password = document.getElementById('newPassword').value;
+
+        if (addUserAlert) {
+          addUserAlert.style.display = 'none';
+          addUserAlert.textContent = '';
+        }
+
+        if (!fullName || !userId) {
+          if (addUserAlert) {
+            addUserAlert.textContent = 'Harap lengkapi Nama Lengkap dan User ID!';
+            addUserAlert.style.display = 'block';
+          }
+          return;
+        }
+
+        const payload = {
+          user_id: userId,
+          full_name: fullName,
+          role: role,
+          default_station: station,
+          password: password,
+          is_protected: false
+        };
+
+        const originalBtnHtml = btnSaveUser.innerHTML;
+        btnSaveUser.disabled = true;
+        btnSaveUser.innerHTML = '<span>Menyimpan ke Database...</span>';
+
+        try {
+          const res = await API.post('/api/v1/users', payload);
+          if (res && res.success) {
+            App.toast(`Pengguna ${fullName} (${role}) berhasil disimpan!`, 'success');
+            closeModal();
+            await loadUsers();
+          } else {
+            const errMsg = res ? res.message : 'Gagal menambahkan pengguna.';
+            if (addUserAlert) {
+              addUserAlert.textContent = errMsg;
+              addUserAlert.style.display = 'block';
+            } else {
+              App.toast(errMsg, 'error');
+            }
+          }
+        } catch (err) {
+          if (addUserAlert) {
+            addUserAlert.textContent = 'Terjadi kesalahan koneksi ke server.';
+            addUserAlert.style.display = 'block';
+          }
+        } finally {
+          btnSaveUser.disabled = false;
+          btnSaveUser.innerHTML = originalBtnHtml;
+        }
+      };
+
+      // Filter search
+      document.getElementById('searchUser').oninput = (e) => {
+        const q = e.target.value.toLowerCase().trim();
+        if (!q) {
+          renderUsers();
+          return;
+        }
+        const filtered = usersData.filter(u =>
+          u.user_id.toLowerCase().includes(q) ||
+          u.full_name.toLowerCase().includes(q) ||
+          u.role.toLowerCase().includes(q) ||
+          (u.default_station && u.default_station.toLowerCase().includes(q))
+        );
+        renderUsers(filtered);
+      };
+    });
+  </script>
+</body>
+</html>

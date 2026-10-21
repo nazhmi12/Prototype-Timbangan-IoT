@@ -1,0 +1,108 @@
+/* ==============================================================================
+   RESPONSIVE LAYOUT & MEDIA QUERIES (responsive.css)
+   ============================================================================== */
+
+@media (max-width: 1024px) {
+  .app-container {
+    grid-template-columns: 190px 1fr;
+  }
+  .pricing-toolbar {
+    grid-template-columns: 1fr 1fr;
+  }
+  .kpi-row {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .summary-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 820px) {
+  .app-container {
+    grid-template-columns: 1fr;
+  }
+
+  .sidebar {
+    border-right: 0;
+    border-bottom: 1px solid var(--line);
+    padding: 0;
+  }
+
+  .sidebar nav {
+    display: flex;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 6px 12px;
+    gap: 4px;
+  }
+
+  .nav-section-title {
+    display: none;
+  }
+
+  .sidebar nav a {
+    white-space: nowrap;
+    border-left: 0;
+    border-bottom: 3px solid transparent;
+    padding: 8px 14px;
+    font-size: 13.5px;
+  }
+
+  .sidebar nav a.active {
+    border-bottom-color: var(--red);
+    border-left-color: transparent;
+  }
+
+  .sidebar-footer {
+    display: none;
+  }
+
+  .main-content {
+    padding: 16px;
+  }
+
+  .station-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .station-scale-panel {
+    border-right: 0;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .pricing-toolbar {
+    grid-template-columns: 1fr;
+  }
+
+  .summary-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .kpi-row {
+    grid-template-columns: 1fr;
+  }
+
+  .terminal-number {
+    font-size: 44px;
+  }
+
+  .hdr {
+    padding: 10px 16px;
+  }
+
+  .sys-title {
+    display: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .weigh-form-row {
+    grid-template-columns: 1fr;
+  }
+  .weigh-action-btns {
+    flex-direction: column;
+  }
+  .terminal-display {
+    justify-content: center;
+  }
+}

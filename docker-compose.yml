@@ -1,0 +1,103 @@
+version: '3.8'
+
+services:
+  # ----------------------------------------------------------------------------
+  # MQTT Message Broker (Mosquitto)
+  # ----------------------------------------------------------------------------
+  mqtt-broker:
+    image: eclipse-mosquitto:2.0
+    container_name: rphu-mqtt-broker
+    restart: unless-stopped
+    ports:
+      - "1883:1883"
+      - "9001:9001"
+    volumes:
+      - ./mqtt/mosquitto.conf:/mosquitto/config/mosquitto.conf:ro
+    networks:
+      - rphu-network
+
+  # ----------------------------------------------------------------------------
+  # Database Server (MySQL 8.0)
+  # ----------------------------------------------------------------------------
+  db:
+    image: mysql:8.0
+    container_name: rphu-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root_secure_password
+      MYSQL_DATABASE: rphu_timbang_db
+      MYSQL_USER: rphu_user
+      MYSQL_PASSWORD: rphu_password123
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./database/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+      - ./database/seed.sql:/docker-entrypoint-initdb.d/02-seed.sql:ro
+    networks:
+      - rphu-network
+
+  # ----------------------------------------------------------------------------
+  # Backend API Server (PHP 8.2 + Apache)
+  # ----------------------------------------------------------------------------
+  backend:
+    image: php:8.2-apache
+    container_name: rphu-backend-api
+    restart: unless-stopped
+    ports:
+      - "8000:80"
+    environment:
+      - DB_HOST=db
+      - DB_PORT=3306
+      - DB_DATABASE=rphu_timbang_db
+      - DB_USERNAME=rphu_user
+      - DB_PASSWORD=rphu_password123
+      - MQTT_HOST=mqtt-broker
+      - MQTT_PORT=1883
+    volumes:
+      - ./backend:/var/www/html
+      - ./backend/storage:/var/www/html/storage
+    depends_on:
+      - db
+      - mqtt-broker
+    networks:
+      - rphu-network
+
+  # ----------------------------------------------------------------------------
+  # Frontend Static Web Server (Nginx)
+  # ----------------------------------------------------------------------------
+  frontend:
+    image: nginx:alpine
+    container_name: rphu-frontend-ui
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    volumes:
+      - ./frontend/src:/usr/share/nginx/html:ro
+    networks:
+      - rphu-network
+
+  # ----------------------------------------------------------------------------
+  # Database GUI (phpMyAdmin)
+  # ----------------------------------------------------------------------------
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:latest
+    container_name: rphu-phpmyadmin
+    restart: unless-stopped
+    ports:
+      - "8081:80"
+    environment:
+      PMA_HOST: db
+      PMA_PORT: 3306
+      UPLOAD_LIMIT: 64M
+    depends_on:
+      - db
+    networks:
+      - rphu-network
+
+networks:
+  rphu-network:
+    driver: bridge
+
+volumes:
+  db_data:

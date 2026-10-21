@@ -1,0 +1,105 @@
+{
+  "version": 1,
+  "author": "Nazhmi Dwiputra Efendi",
+  "editor": "wokwi",
+  "parts": [
+    {
+      "type": "board-esp32-devkit-c-v4",
+      "id": "esp",
+      "top": 20,
+      "left": 20,
+      "attrs": {}
+    },
+    {
+      "type": "wokwi-hx711",
+      "id": "hx",
+      "top": 50,
+      "left": 400,
+      "attrs": {
+        "type": "50kg"
+      }
+    },
+    {
+      "type": "wokwi-lcd1602",
+      "id": "lcd",
+      "top": 250,
+      "left": 360,
+      "attrs": {
+        "pins": "i2c"
+      }
+    },
+    {
+      "type": "wokwi-pushbutton",
+      "id": "tare",
+      "top": 390,
+      "left": 430,
+      "attrs": {
+        "color": "green",
+        "label": "TARE"
+      }
+    }
+  ],
+  "connections": [
+    [
+      "esp:3V3",
+      "hx:VCC",
+      "red",
+      []
+    ],
+    [
+      "esp:GND.1",
+      "hx:GND",
+      "black",
+      []
+    ],
+    [
+      "esp:4",
+      "hx:DT",
+      "green",
+      []
+    ],
+    [
+      "esp:5",
+      "hx:SCK",
+      "blue",
+      []
+    ],
+    [
+      "esp:VIN",
+      "lcd:VCC",
+      "red",
+      []
+    ],
+    [
+      "esp:GND.2",
+      "lcd:GND",
+      "black",
+      []
+    ],
+    [
+      "esp:21",
+      "lcd:SDA",
+      "green",
+      []
+    ],
+    [
+      "esp:22",
+      "lcd:SCL",
+      "blue",
+      []
+    ],
+    [
+      "esp:18",
+      "tare:1.l",
+      "yellow",
+      []
+    ],
+    [
+      "esp:GND.3",
+      "tare:2.l",
+      "black",
+      []
+    ]
+  ],
+  "dependencies": {}
+}

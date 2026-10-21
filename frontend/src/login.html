@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Portal Masuk Petugas – Sistem Timbang &amp; Susut RPHU</title>
+  <link rel="stylesheet" href="assets/css/main.css?v=20261014_human">
+  <link rel="stylesheet" href="assets/css/login.css?v=20261014_human">
+</head>
+<body class="login-body">
+  <div class="login-split-layout">
+    
+    <!-- LEFT PANEL: Enterprise Industrial Operations Overview -->
+    <aside class="login-brand-panel">
+      <div class="brand-panel-top">
+        <div class="brand-company-tag">Sistem Timbang RPHU</div>
+        <div class="brand-holding-badge">
+          <span>Smart Poultry System</span>
+          <span class="dot"></span>
+          <span>RPHU Modern</span>
+        </div>
+      </div>
+
+      <div class="brand-panel-body">
+        <div class="brand-status-chip">
+          <span class="pulse-dot"></span>
+          <span>Terminal Telemetri Siap Operasi</span>
+        </div>
+
+        <h1 class="brand-headline">
+          Sistem Timbang &amp; Verifikasi RPHU
+        </h1>
+
+        <p class="brand-description">
+          Terminal operasional terpadu penimbangan unggas hidup, kalkulasi susut transit peternak, dan verifikasi rendemen karkas berstandar SNI &amp; Halal.
+        </p>
+
+        <!-- Industrial Telemetry & Hardware Card -->
+        <div class="brand-terminal-card">
+          <div class="terminal-card-header">
+            <span class="card-header-title">Parameter Terminal Lapangan</span>
+            <span class="terminal-live-tag" id="liveDbBadge">ONLINE</span>
+          </div>
+          <div class="terminal-spec-grid">
+            <div class="terminal-spec-item">
+              <span class="spec-label">Database Sistem</span>
+              <span class="spec-val" id="dbEngineVal" style="color:#10b981;font-weight:700;">SQLite Connected</span>
+            </div>
+            <div class="terminal-spec-item">
+              <span class="spec-label">Unit Operasi</span>
+              <span class="spec-val">RPHU Modern Subang</span>
+            </div>
+            <div class="terminal-spec-item">
+              <span class="spec-label">Sensor Timbang</span>
+              <span class="spec-val">HX711 24-bit ADC</span>
+            </div>
+            <div class="terminal-spec-item">
+              <span class="spec-label">Protokol Sinkron</span>
+              <span class="spec-val">MQTT Edge Broker</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Authentic Operational Standards Reference -->
+        <div class="brand-kpi-reference">
+          <div class="kpi-ref-item">
+            <span class="kpi-ref-val">&le; 2.50%</span>
+            <span class="kpi-ref-label">Toleransi Susut Transit</span>
+          </div>
+          <div class="kpi-ref-item">
+            <span class="kpi-ref-val">68% &ndash; 73%</span>
+            <span class="kpi-ref-label">Standar Rendemen Karkas</span>
+          </div>
+          <div class="kpi-ref-item">
+            <span class="kpi-ref-val">3 Shift / 24 Jam</span>
+            <span class="kpi-ref-label">Siklus Potong Kontinu</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="brand-panel-footer">
+        <span>Sistem Timbang RPHU v1.4.2</span>
+        <span>ID Perangkat: SCALE-WS-01</span>
+      </div>
+    </aside>
+
+    <!-- RIGHT PANEL: Clean, Human-Designed Authentication Portal -->
+    <main class="login-form-panel">
+      <header class="form-panel-header">
+        <div class="form-clock-text" id="liveClock"></div>
+        <div class="seg-toggle" role="group" aria-label="Mode tampilan">
+          <button data-m="light" aria-pressed="false" type="button">Terang</button>
+          <button data-m="dark" aria-pressed="false" type="button">Gelap</button>
+        </div>
+      </header>
+
+      <div class="form-panel-center">
+        <div class="form-title-group">
+          <h2 class="form-main-title">Masuk ke Sistem</h2>
+          <p class="form-main-subtitle">
+            Masukkan ID petugas dan kata sandi akun Anda untuk memulai sesi operasional stasiun kerja.
+          </p>
+        </div>
+
+        <form id="loginForm" class="login-form" novalidate>
+          <div class="form-group">
+            <label for="u">ID Petugas</label>
+            <input type="text" id="u" placeholder="Masukkan ID petugas" autocomplete="username" autocapitalize="none" spellcheck="false" required>
+            <div class="field-error-msg" id="um"></div>
+          </div>
+
+          <div class="form-group">
+            <label for="p">Kata Sandi</label>
+            <div class="pw-wrapper">
+              <input type="password" id="p" placeholder="Masukkan kata sandi" autocomplete="current-password" required>
+              <button type="button" class="btn-toggle-pw" id="sh" aria-label="Tampilkan kata sandi">Lihat</button>
+            </div>
+            <div class="field-error-msg" id="pm"></div>
+          </div>
+
+          <div class="form-grid-two">
+            <div class="form-group" style="margin-bottom:0;">
+              <label for="s">Stasiun Operasional</label>
+              <select id="s">
+                <option value="Timbang 1">Timbang 1 (Penerimaan)</option>
+                <option value="Timbang karkas">Timbang Karkas</option>
+                <option value="Cold storage">Cold Storage</option>
+                <option value="Kantor">Kantor Administrasi</option>
+              </select>
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label for="sf">Shift Kerja</label>
+              <select id="sf">
+                <option value="Pagi">Pagi (06:00 - 14:00)</option>
+                <option value="Siang">Siang (14:00 - 22:00)</option>
+                <option value="Malam">Malam (22:00 - 06:00)</option>
+              </select>
+            </div>
+          </div>
+
+          <label class="chk-remember">
+            <input type="checkbox" id="r">
+            <span>Ingat ID petugas pada terminal ini</span>
+          </label>
+
+          <button class="btn-login-submit" id="btnSubmit" type="submit">
+            Masuk ke Stasiun Kerja
+          </button>
+        </form>
+      </div>
+
+      <footer class="form-panel-footer">
+        Hak Cipta &copy; 2026 Sistem Timbang &amp; Susut RPHU Modern
+      </footer>
+    </main>
+  </div>
+
+  <script src="assets/js/auth.js"></script>
+  <script src="assets/js/api.js"></script>
+  <script src="assets/js/app.js"></script>
+  <script>
+    const $ = id => document.getElementById(id);
+
+    // Inisialisasi tema tampilan
+    Auth.initTheme();
+
+    // Jam & tanggal live
+    function updateClock() {
+      const now = new Date();
+      const str = now.toLocaleDateString('id-ID', {
+        weekday: 'long',
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+      const el = $('liveClock');
+      if (el) el.textContent = str;
+    }
+    updateClock();
+    setInterval(updateClock, 30000);
+
+    // Otomasi Shift berdasarkan jam sekarang
+    (function () {
+      const h = new Date().getHours();
+      $('sf').selectedIndex = (h >= 6 && h < 14) ? 0 : (h >= 14 && h < 22) ? 1 : 2;
+    })();
+
+    // Pastikan seluruh isian form selalu kosong saat halaman dibuka untuk input manual
+    $('u').value = '';
+    $('p').value = '';
+    $('u').focus();
+
+    // Toggle Lihat / Tutup Password
+    $('sh').onclick = () => {
+      const isPw = $('p').type === 'password';
+      $('p').type = isPw ? 'text' : 'password';
+      $('sh').textContent = isPw ? 'Tutup' : 'Lihat';
+      Auth.beep(750, 0.04);
+    };
+
+    // Deteksi Caps Lock
+    $('p').addEventListener('keyup', e => {
+      const on = e.getModifierState && e.getModifierState('CapsLock');
+      $('pm').textContent = on ? 'Peringatan: Tombol Caps Lock aktif.' : '';
+    });
+
+    // Form submit terhubung langsung ke database SQLite via REST API
+    $('loginForm').addEventListener('submit', async e => {
+      e.preventDefault();
+      const u = $('u').value.trim();
+      const p = $('p').value;
+      const s = $('s').value;
+      const sf = $('sf').value;
+
+      $('um').textContent = '';
+      $('pm').textContent = '';
+
+      if (!u) {
+        $('um').textContent = 'ID petugas belum diisi.';
+        $('u').focus();
+        return;
+      }
+      if (!p) {
+        $('pm').textContent = 'Kata sandi belum diisi.';
+        $('p').focus();
+        return;
+      }
+
+      if ($('r').checked) {
+        localStorage.setItem('rphu-user', u);
+      } else {
+        localStorage.removeItem('rphu-user');
+      }
+
+      const btn = $('btnSubmit');
+      btn.disabled = true;
+      btn.textContent = 'Memverifikasi ke Database...';
+      Auth.beep(600, 0.08);
+
+      try {
+        const res = await API.post('/api/v1/auth/login', {
+          user_id: u,
+          password: p,
+          station: s,
+          shift: sf
+        });
+
+        if (res && res.success && res.data && res.data.user) {
+          const userObj = res.data.user;
+          Auth.setCurrentUser(userObj);
+          if (res.data.token) {
+            localStorage.setItem('rphu-token', res.data.token);
+          }
+          Auth.beep(1000, 0.15);
+          
+          if (userObj.role === 'operator') {
+            window.location.href = 'pages/timbang-susut.html';
+          } else {
+            window.location.href = 'pages/dashboard.html';
+          }
+        } else {
+          btn.disabled = false;
+          btn.textContent = 'Masuk ke Stasiun Kerja';
+          $('um').textContent = (res && res.message) ? res.message : 'ID petugas atau kata sandi tidak sesuai dengan database!';
+          $('u').focus();
+        }
+      } catch (err) {
+        btn.disabled = false;
+        btn.textContent = 'Masuk ke Stasiun Kerja';
+        $('um').textContent = 'Gagal terhubung ke database server. Pastikan server dev aktif!';
+      }
+    });
+
+    // Cek koneksi live ke database SQLite saat halaman dibuka
+    async function checkDbConnection() {
+      try {
+        const res = await API.get('/api/v1/database/status');
+        if (res && res.success && res.database) {
+          const count = res.database.tables.users;
+          const el = $('dbEngineVal');
+          if (el) el.textContent = `SQLite (${count} Akun)`;
+          const badge = $('liveDbBadge');
+          if (badge) {
+            badge.textContent = 'ONLINE';
+            badge.style.background = '#059669';
+          }
+        }
+      } catch (e) {
+        const el = $('dbEngineVal');
+        if (el) {
+          el.textContent = 'Terputus';
+          el.style.color = '#ef4444';
+        }
+        const badge = $('liveDbBadge');
+        if (badge) {
+          badge.textContent = 'OFFLINE';
+          badge.style.background = '#dc2626';
+        }
+      }
+    }
+    checkDbConnection();
+  </script>
+</body>
+</html>

@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Data Peternak &amp; Pemasok – Sistem Timbang RPHU</title>
+  <link rel="stylesheet" href="../assets/css/main.css">
+  <link rel="stylesheet" href="../assets/css/dashboard.css">
+  <link rel="stylesheet" href="../assets/css/responsive.css">
+</head>
+<body>
+  <div class="top-strip"></div>
+  <header class="hdr">
+    <div class="brand">
+      <div class="brand-logo-badge">RPHU</div>
+      <div class="brand-text">
+        <b>RPHU MODERN</b>
+        <small>Smart Poultry System</small>
+      </div>
+      <div class="sys-title">
+        Sistem Timbang dan Susut RPHU
+        <span class="sys-badge">Master Peternak</span>
+      </div>
+      <div class="station-pill">
+        <span class="dot-online"></span>
+        <span>Stasiun: <b id="currentStationLabel">Master Data</b></span>
+      </div>
+    </div>
+    <div class="header-status">
+      <div class="seg-toggle" role="group" aria-label="Mode tampilan">
+        <button data-m="light" aria-pressed="false" type="button">Terang</button>
+        <button data-m="dark" aria-pressed="false" type="button">Gelap</button>
+      </div>
+
+      <!-- Pojok Kanan Atas: Tanggal/Waktu & Profil Operator -->
+      <div class="header-right-corner">
+        <div class="header-datetime" title="Waktu Sistem Operasional">
+          <span id="tgl"></span>
+        </div>
+        <div class="user-profile">
+          <span class="user-name" id="currentUserLabel">Supervisor</span>
+          <button class="btn-logout" id="btnLogout" type="button">Keluar</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="app-container">
+    <aside class="sidebar">
+      <nav aria-label="Menu Navigasi">
+        <div class="nav-section-title">Operasional</div>
+        <a href="penerimaan-ayam.html">Penerimaan ayam</a>
+        <a href="timbang-susut.html">Timbang &amp; susut</a>
+        <a href="produksi.html">Produksi</a>
+        <a href="cold-storage.html">Stok cold storage</a>
+        <a href="penjualan.html">Penjualan</a>
+
+        <div class="nav-section-title">Data &amp; Laporan</div>
+        <a href="dashboard.html">Dashboard KPI</a>
+        <a href="peternak.html" class="active">Peternak</a>
+        <a href="laporan.html">Laporan</a>
+
+        <div class="nav-section-title">Administrasi Sistem</div>
+        <a href="users.html">Manajemen User</a>
+        <a href="log-aktivitas.html">Log Aktivitas</a>
+      </nav>
+      <div class="sidebar-footer">
+        <p><b>Kemitraan Peternak RPHU</b><br>Evaluasi Kualitas &amp; Susut Transit</p>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <div class="crumb">Beranda / Master Data / Peternak &amp; Evaluasi Susut Transit</div>
+      <div class="page-header">
+        <div>
+          <h2 class="page-title">Master Data Peternak &amp; Evaluasi Susut Transit</h2>
+          <p style="font-size:13px;color:var(--mute);margin-top:2px;">
+            Peringkat dan performa penyusutan bobot ayam hidup berdasarkan rekam jejak pengiriman
+          </p>
+        </div>
+        <div class="page-actions">
+          <button class="btn btn-primary" id="btnOpenAddFarmer" onclick="FarmerUI.openAddModal()" type="button">
+            Tambah Mitra Peternak
+          </button>
+        </div>
+      </div>
+
+      <!-- Quick KPI Cards for Farmers -->
+      <div class="kpi-row">
+        <div class="kpi-card">
+          <div class="kpi-card-label">Total Mitra Terdaftar</div>
+          <div class="kpi-card-value" id="kpiFarmerTotal">4 Mitra (4 Aktif)</div>
+          <div class="kpi-card-sub">
+            <span class="kpi-badge">Mitra</span>
+            <span>Pemasok Kemitraan</span>
+          </div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-card-label">Rata-rata Susut Transit</div>
+          <div class="kpi-card-value" id="kpiFarmerAvgShrink">2.06%</div>
+          <div class="kpi-card-sub">
+            <span class="kpi-badge kpi-badge-normal">Target</span>
+            <span>Toleransi &le; 2.50%</span>
+          </div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-card-label">Mitra Kinerja Terbaik</div>
+          <div class="kpi-card-value" id="kpiFarmerBest">CV Sinar Kandang</div>
+          <div class="kpi-card-sub">
+            <span class="kpi-badge kpi-badge-good">1.38% Susut</span>
+            <span>Kinerja Terbaik</span>
+          </div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-card-label">Mitra Perlu Evaluasi</div>
+          <div class="kpi-card-value" id="kpiFarmerNeedEval">1 Mitra</div>
+          <div class="kpi-card-sub">
+            <span class="kpi-badge kpi-badge-alert">Perhatian</span>
+            <span>Susut &gt; 3.0%</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Info Evaluasi Susut Table Box -->
+      <section class="box">
+        <div class="box-header" style="flex-wrap:wrap;gap:12px;">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <span style="font-weight:700;">Daftar Peringkat Kinerja Peternak</span>
+            <span class="station-pill" style="font-size:11px;">Susut Rendah = Peringkat Unggul</span>
+          </div>
+          <div class="search-input-wrapper">
+            <input type="text" id="searchFarmer" placeholder="Cari nama, kode, wilayah..." autocomplete="off">
+          </div>
+        </div>
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th class="text-center" style="width:70px;">Rank</th>
+                <th class="text-left" style="width:100px;">Kode</th>
+                <th class="text-left">Nama Peternak / Vendor</th>
+                <th class="text-left">Wilayah Kandang</th>
+                <th class="text-left">No. Telepon</th>
+                <th class="text-right">Harga Acuan</th>
+                <th class="text-right">Rata-rata Susut</th>
+                <th class="text-center">Kinerja</th>
+                <th class="text-center" style="min-width:140px;">Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="farmerTableBody">
+              <!-- Dynamically populated by FarmerUI -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- MODAL TAMBAH MITRA PETERNAK -->
+  <div class="modal-backdrop" id="modalAddFarmer">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 class="modal-title">Tambah Mitra Peternak Baru</h3>
+        <button class="modal-close" data-close-modal type="button">&times;</button>
+      </div>
+      <form id="formAddFarmer">
+        <div class="modal-body">
+          <div class="form-grid-2">
+            <div class="form-group">
+              <label for="addFarmerCode">Kode Peternak</label>
+              <input type="text" id="addFarmerCode" required placeholder="PTK-005">
+            </div>
+            <div class="form-group">
+              <label for="addFarmerStatus">Status Kemitraan</label>
+              <select id="addFarmerStatus">
+                <option value="active">Aktif</option>
+                <option value="evaluation">Dalam Evaluasi</option>
+                <option value="inactive">Nonaktif</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="addFarmerName">Nama Peternak / Badan Usaha</label>
+            <input type="text" id="addFarmerName" required placeholder="Contoh: CV Ternak Mandiri">
+          </div>
+
+          <div class="form-grid-2">
+            <div class="form-group">
+              <label for="addFarmerRegion">Wilayah Kandang &amp; Jarak</label>
+              <input type="text" id="addFarmerRegion" placeholder="Contoh: Subang (50 km)">
+            </div>
+            <div class="form-group">
+              <label for="addFarmerPhone">Nomor Telepon / WhatsApp</label>
+              <input type="text" id="addFarmerPhone" placeholder="Contoh: 0812-3456-7890">
+            </div>
+          </div>
+
+          <div class="form-grid-2">
+            <div class="form-group">
+              <label for="addFarmerPrice">Harga Beli Dasar (Rp/kg)</label>
+              <input type="number" id="addFarmerPrice" value="21000" step="100">
+            </div>
+            <div class="form-group">
+              <label for="addFarmerShrinkage">Estimasi Susut Rata-rata (%)</label>
+              <input type="number" id="addFarmerShrinkage" value="1.50" step="0.01">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="addFarmerNotes">Catatan Tambahan &amp; Logistik</label>
+            <textarea id="addFarmerNotes" rows="2" placeholder="Catatan kondisi kandang, armada truk, waktu tempuh..."></textarea>
+          </div>
+
+          <div id="addFarmerAlert" style="display:none;margin-top:12px;padding:10px 12px;background:#fff1f2;border:1px solid #fecdd3;border-radius:6px;color:#be123c;font-size:12px;"></div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn" data-close-modal type="button">Batal</button>
+          <button class="btn btn-primary" id="btnSubmitAddFarmer" type="submit">Simpan Mitra</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL EDIT MITRA PETERNAK -->
+  <div class="modal-backdrop" id="modalEditFarmer">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 class="modal-title">Edit Data Mitra Peternak</h3>
+        <button class="modal-close" data-close-modal type="button">&times;</button>
+      </div>
+      <form id="formEditFarmer">
+        <input type="hidden" id="editFarmerId">
+        <div class="modal-body">
+          <div class="form-grid-2">
+            <div class="form-group">
+              <label for="editFarmerCode">Kode Peternak</label>
+              <input type="text" id="editFarmerCode" required>
+            </div>
+            <div class="form-group">
+              <label for="editFarmerStatus">Status Kemitraan</label>
+              <select id="editFarmerStatus">
+                <option value="active">Aktif</option>
+                <option value="evaluation">Dalam Evaluasi</option>
+                <option value="inactive">Nonaktif</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="editFarmerName">Nama Peternak / Badan Usaha</label>
+            <input type="text" id="editFarmerName" required>
+          </div>
+
+          <div class="form-grid-2">
+            <div class="form-group">
+              <label for="editFarmerRegion">Wilayah Kandang &amp; Jarak</label>
+              <input type="text" id="editFarmerRegion">
+            </div>
+            <div class="form-group">
+              <label for="editFarmerPhone">Nomor Telepon / WhatsApp</label>
+              <input type="text" id="editFarmerPhone">
+            </div>
+          </div>
+
+          <div class="form-grid-2">
+            <div class="form-group">
+              <label for="editFarmerPrice">Harga Beli Dasar (Rp/kg)</label>
+              <input type="number" id="editFarmerPrice" step="100">
+            </div>
+            <div class="form-group">
+              <label for="editFarmerShrinkage">Estimasi Susut Rata-rata (%)</label>
+              <input type="number" id="editFarmerShrinkage" step="0.01">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="editFarmerNotes">Catatan Tambahan &amp; Logistik</label>
+            <textarea id="editFarmerNotes" rows="2"></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn" data-close-modal type="button">Batal</button>
+          <button class="btn btn-primary" type="submit">Perbarui Data</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL KONFIRMASI HAPUS PETERNAK -->
+  <div class="modal-backdrop" id="modalDeleteFarmer">
+    <div class="modal-dialog modal-danger">
+      <div class="modal-header">
+        <h3 class="modal-title" style="color:var(--red);">Konfirmasi Hapus Mitra</h3>
+        <button class="modal-close" data-close-modal type="button">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size:14px;color:var(--ink);line-height:1.5;">
+          Apakah Anda yakin ingin menghapus data mitra peternak <b id="deleteFarmerName" style="color:var(--red);">–</b>?
+        </p>
+        <p style="font-size:12.5px;color:var(--mute);margin-top:8px;">
+          Tindakan ini akan menghapus data peternak dari master list. Riwayat transaksi lot terdahulu tetap diarsipkan.
+        </p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn" data-close-modal type="button">Batal</button>
+        <button class="btn btn-danger" id="btnConfirmDelete" type="button">Hapus Permanen</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="../assets/js/api.js"></script>
+  <script src="../assets/js/auth.js"></script>
+  <script src="../assets/js/lot.js"></script>
+  <script src="../assets/js/peternak.js"></script>
+  <script src="../assets/js/app.js"></script>
+</body>
+</html>

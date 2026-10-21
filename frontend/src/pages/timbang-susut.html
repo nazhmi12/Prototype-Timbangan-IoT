@@ -1,0 +1,833 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Timbang &amp; Susut – Sistem Timbang RPHU</title>
+  <link rel="stylesheet" href="../assets/css/main.css?v=20261013_corner">
+  <link rel="stylesheet" href="../assets/css/dashboard.css?v=2.4">
+  <link rel="stylesheet" href="../assets/css/responsive.css?v=20261013_corner">
+</head>
+<body>
+  <!-- Top brand bar -->
+  <div class="top-strip"></div>
+  <header class="hdr">
+    <div class="brand">
+      <div class="brand-logo-badge">RPHU</div>
+      <div class="brand-text">
+        <b>RPHU MODERN</b>
+        <small>Smart Poultry</small>
+      </div>
+      <div class="sys-title">
+        <span>Timbang &amp; Susut</span>
+      </div>
+      <div class="station-pill">
+        <span class="dot-online"></span>
+        <span id="currentStationLabel">Timbang 1</span>
+      </div>
+    </div>
+    <div class="header-status">
+      <div class="seg-toggle" role="group" aria-label="Mode tampilan">
+        <button data-m="light" aria-pressed="false" type="button">Terang</button>
+        <button data-m="dark" aria-pressed="false" type="button">Gelap</button>
+      </div>
+
+      <!-- Pojok Kanan Atas: Tanggal/Waktu & Profil Operator -->
+      <div class="header-right-corner">
+        <div class="header-datetime" title="Waktu Sistem Operasional">
+          <span id="tgl"></span>
+        </div>
+        <div class="user-profile">
+          <span class="user-name" id="currentUserLabel">Operator 1</span>
+          <button class="btn-logout" id="btnLogout" type="button">Keluar</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="app-container">
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+      <nav aria-label="Menu Navigasi">
+        <div class="nav-section-title">Operasional</div>
+        <a href="penerimaan-ayam.html">Penerimaan ayam</a>
+        <a href="timbang-susut.html" class="active">Timbang &amp; susut</a>
+        <a href="produksi.html">Produksi</a>
+        <a href="cold-storage.html">Stok cold storage</a>
+        <a href="penjualan.html">Penjualan</a>
+
+        <div class="nav-section-title">Data &amp; Laporan</div>
+        <a href="dashboard.html">Dashboard KPI</a>
+        <a href="peternak.html">Peternak</a>
+        <a href="laporan.html">Laporan</a>
+
+        <div class="nav-section-title">Administrasi Sistem</div>
+        <a href="users.html">Manajemen User</a>
+        <a href="log-aktivitas.html">Log Aktivitas</a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <p><b>IoT RPHU Scale v1.4</b><br>
+        Node: ESP32 + HX711 24-bit<br>
+        Moving Avg Filter (N=15)</p>
+      </div>
+    </aside>
+
+    <!-- Main Workspace -->
+    <main class="main-content">
+      <div class="crumb">Beranda / Operasional / Stasiun Timbang</div>
+      <div class="page-header">
+        <h2 class="page-title">Timbang &amp; Susut Bobot Unggas</h2>
+        <div class="page-actions">
+          <button type="button" class="btn btn-primary" id="btnOpenScanSJ" onclick="ScanSuratJalan.openModal('kamera')" style="display:inline-flex;align-items:center;gap:7px;font-weight:700;background:linear-gradient(135deg,#2563eb,#1d4ed8);box-shadow:0 3px 10px rgba(37,99,235,0.35);">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+              <circle cx="12" cy="13" r="4"></circle>
+            </svg>
+            Scan Surat Jalan (Pop-up)
+          </button>
+          <button class="btn" id="btnOpenAddLot" type="button">Tambah Lot</button>
+          <button class="btn" id="btnExportQuickExcel" type="button" title="Unduh Spreadsheet Excel (.xls)">Ekspor Excel (.xls)</button>
+          <button class="btn" id="btnExportQuick" type="button" title="Unduh CSV terstruktur">Ekspor CSV (.csv)</button>
+          <button class="btn" onclick="ReportEngine.printReport()" type="button">Cetak</button>
+        </div>
+      </div>
+
+      <!-- Quick KPI Cards Banner -->
+      <div class="kpi-row">
+        <div class="kpi-card">
+          <div class="kpi-card-label">Total Ayam Diterima</div>
+          <div class="kpi-card-value" id="kpiBirds">10.050 Ekor</div>
+          <div class="kpi-card-sub">
+            <span class="kpi-badge">Hari Ini</span>
+            <span>4 Lot Penerimaan</span>
+          </div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-card-label">Rata-rata Susut Transit</div>
+          <div class="kpi-card-value" id="kpiTransit">1.88%</div>
+          <div class="kpi-card-sub">
+            <span class="kpi-badge kpi-badge-normal">Normal</span>
+            <span>Toleransi &le; 2.50%</span>
+          </div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-card-label">Rata-rata Yield Karkas</div>
+          <div class="kpi-card-value" id="kpiYield">71.02%</div>
+          <div class="kpi-card-sub">
+            <span class="kpi-badge kpi-badge-good">SNI Tercapai</span>
+            <span>Standar 68% &ndash; 73%</span>
+          </div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-card-label">Estimasi Kerugian Susut</div>
+          <div class="kpi-card-value" id="kpiLoss">Rp 6.213.500</div>
+          <div class="kpi-card-sub">
+            <span class="kpi-badge kpi-badge-alert">Dampak Biaya</span>
+            <span>Kalkulasi Otomatis</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Station Weighing Box -->
+      <section class="box" aria-label="Stasiun Timbangan Digital">
+        <div class="box-header">
+          <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+            <span style="font-weight:700;">Stasiun Timbangan Digital</span>
+            <span class="station-pill" id="scaleTerminalNodeInfo" style="font-size:11px;font-weight:500;padding:2px 8px;" title="Status broker telemetri">
+              broker.emqx.io / timbangan/automation
+            </span>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <div class="iot-source-switch" role="group" aria-label="Mode Sumber Data">
+              <button class="iot-source-btn active" id="btnModeStream" type="button" title="Streaming data langsung dari timbangan">Live ESP32</button>
+              <button class="iot-source-btn" id="btnModeSim" type="button" title="Mode simulasi manual">Simulasi</button>
+            </div>
+            <button class="btn-action-sm" id="btnOpenHwPanel" type="button" title="Pengujian nilai sensor">Uji Sensor</button>
+          </div>
+        </div>
+
+        <div class="station-grid">
+          <!-- Left: Digital Scale Panel & Controls -->
+          <div class="station-scale-panel">
+            <h3 style="font-family:var(--font-display);font-size:15px;margin-bottom:12px;color:var(--ink);font-weight:700;">
+              Indikator Timbangan Digital
+            </h3>
+
+            <!-- Modern Industrial Scale Display -->
+            <div class="scale-card-display">
+              <div class="scale-card-topbar">
+                <div class="status-pill-wrap">
+                  <span class="hud-badge active-stable" id="badgeStable" style="display:none;">STABLE</span>
+                  <span class="hud-badge" id="badgeTare" style="display:none;">TARE</span>
+                  <span class="hud-badge" id="badgeNet" style="display:none;">NET</span>
+                  <span class="hud-badge" id="badgeGross" style="display:none;">GROSS</span>
+                  <span class="scale-status-pill stable" id="stabilityPill">STABIL</span>
+                </div>
+                <div class="scale-tare-tag" id="tareStatusTag">GROSS (BRUTO)</div>
+              </div>
+
+              <div class="scale-digits-row" aria-live="polite">
+                <b class="scale-giant-number" id="readNumber">0.0</b>
+                <span class="scale-unit-label">kg</span>
+              </div>
+
+              <div class="terminal-stability-bar" style="height:3px;margin:6px 0 10px;background:#1e293b;border-radius:2px;overflow:hidden;">
+                <div class="stability-progress" id="stabilityProgress" style="height:100%;width:0%;background:#10b981;transition:width 0.2s ease-out;"></div>
+              </div>
+
+              <div class="scale-message-footer">
+                <span id="readInfo">Timbangan siap. Letakkan keranjang ayam pada platform timbangan.</span>
+                <span style="font-size:11px;color:#64748b;font-family:var(--font-mono);" id="lblNodeRate">SCALE-01</span>
+              </div>
+
+              <div class="scale-actions-row">
+                <button class="btn-scale-tare" id="btnTare" type="button" title="Nol-kan berat wadah atau keranjang">TARE</button>
+                <button class="btn-scale-zero" id="btnZero" type="button" title="Reset titik nol timbangan">ZERO</button>
+              </div>
+            </div>
+
+            <!-- Parameters Selection Form -->
+            <div class="weigh-form-row">
+              <div>
+                <label for="lot" style="font-weight:600;font-size:13px;">Pilih Lot Penerimaan</label>
+                <select id="lot"></select>
+              </div>
+              <div>
+                <label for="stage" style="font-weight:600;font-size:13px;">Tahap Penimbangan</label>
+                <select id="stage">
+                  <option value="hidup">Ayam hidup diterima (Penerimaan)</option>
+                  <option value="basah">Karkas basah (Setelah eviserasi)</option>
+                  <option value="dingin">Karkas dingin (Setelah chilling)</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Quick Lot Context Summary -->
+            <div class="lot-context-summary" id="lotContextCard">
+              <div class="lot-context-item">
+                <span>Pemasok:</span> <b id="lotPemasokLabel">Pak Sumarno</b>
+              </div>
+              <div class="lot-context-item">
+                <span>Kirim:</span> <b id="lotKirimLabel">4.920 kg</b> (<span id="lotEkorLabel">2.400</span> ekor)
+              </div>
+              <div class="lot-context-item">
+                <span>Toleransi Susut:</span> <b style="color:#059669;">1.5% - 2.5%</b>
+              </div>
+            </div>
+
+            <div class="weigh-action-btns">
+              <button class="btn" id="btnRead" type="button" style="flex:0 0 auto;min-width:130px;">
+                Ambil Bobot
+              </button>
+              <button class="btn btn-save-weight-main" id="btnSave" type="button" disabled style="flex:1;">
+                Simpan Penimbangan
+              </button>
+            </div>
+
+            <p style="font-size:12px;color:var(--mute);margin-top:10px;line-height:1.4;">
+              Nilai susut bobot dan yield karkas otomatis dihitung saat data disimpan.
+            </p>
+          </div>
+
+          <!-- Right: Weighing History Log -->
+          <div class="station-history-panel">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+              <h3 style="font-family:var(--font-display);font-size:15px;color:var(--ink);margin:0;font-weight:700;">
+                Riwayat Penimbangan Shift Ini
+              </h3>
+              <span class="station-pill" style="font-size:11px;color:#059669;background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.25);font-weight:600;padding:2px 8px;">
+                Shift Aktif
+              </span>
+            </div>
+            <p style="font-size:12px;color:var(--mute);margin-bottom:8px;">
+              Catatan penimbangan harian. Klik data untuk melihat rincian kalkulasi susut.
+            </p>
+            <ul class="history-log-list" id="logList">
+              <li class="history-empty-placeholder">Belum ada transaksi timbangan pada shift ini.</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- Lot Table Section -->
+      <section class="box" aria-label="Daftar Lot Penerimaan">
+        <div class="box-header">
+          <span>Daftar Lot Hari Ini &amp; Evaluasi Susut</span>
+          <span style="font-size:12px;opacity:0.85;font-weight:400;">Pilih baris untuk melihat ringkasan detail</span>
+        </div>
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Lot ID</th>
+                <th>Peternak / Pemasok</th>
+                <th>Ekor</th>
+                <th>Berat Kirim (kg)</th>
+                <th>Hidup Diterima (kg)</th>
+                <th>Susut Transit</th>
+                <th>Karkas Basah (kg)</th>
+                <th>Karkas Dingin (kg)</th>
+                <th>Susut Total</th>
+                <th>Yield Karkas</th>
+                <th style="min-width:110px;">Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="rows"></tbody>
+            <tfoot id="foot"></tfoot>
+          </table>
+        </div>
+      </section>
+
+      <!-- Lot Financial & Shrinkage Summary Section -->
+      <section class="box" aria-label="Ringkasan Analisis Finansial Lot">
+        <div class="box-header" id="dt">
+          Ringkasan Lot Terpilih
+        </div>
+
+        <div class="pricing-toolbar">
+          <div>
+            <label for="pm">Harga Modal Ayam Hidup (Rp/kg)</label>
+            <input type="number" id="pm" min="0" step="100">
+          </div>
+          <div>
+            <label for="pj">Harga Jual Karkas (Rp/kg)</label>
+            <input type="number" id="pj" min="0" step="100">
+          </div>
+          <div>
+            <label for="ds">Dasar Bayar ke Peternak</label>
+            <select id="ds">
+              <option value="kirim">Berat kirim (timbang di kandang)</option>
+              <option value="terima">Berat hidup diterima (RPHU)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="summary-grid" id="detail"></div>
+
+        <p style="padding:12px 20px;font-size:12.5px;color:var(--mute);line-height:1.4;margin:0;background:var(--panel-alt);">
+          <b>Catatan Analisis:</b> Kerugian susut transit dihitung berdasarkan harga modal ayam hidup, sedangkan kerugian proses chilling dihitung berdasarkan harga jual karkas. Biaya operasional lain (tenaga kerja, listrik freezer, bahan sanitasi) belum dimasukkan, sehingga kalkulasi laba/rugi ini mencerminkan margin kotor.
+        </p>
+      </section>
+
+      <!-- Value and Loss per Lot Table Section -->
+      <section class="box" aria-label="Tabel Nilai dan Kerugian Finansial per Lot">
+        <div class="box-header">
+          <span>Nilai Finansial dan Kerugian Akumulasi per Lot</span>
+          <span style="font-size:12px;opacity:0.85;font-weight:400;">Rincian Transaksi Moneter</span>
+        </div>
+        <div class="table-wrapper">
+          <table style="min-width:920px;">
+            <thead>
+              <tr>
+                <th>Lot ID</th>
+                <th>Peternak</th>
+                <th>Modal Ayam (Rp)</th>
+                <th>Hasil Jual Karkas (Rp)</th>
+                <th>Rugi Transit (Rp)</th>
+                <th>Rugi Chilling (Rp)</th>
+                <th>Total Kerugian Susut (Rp)</th>
+                <th>Laba/Rugi Kotor (Rp)</th>
+              </tr>
+            </thead>
+            <tbody id="vrows"></tbody>
+            <tfoot id="vfoot"></tfoot>
+          </table>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- MODAL TAMBAH LOT BARU -->
+  <div class="modal-backdrop" id="modalAddLot">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 class="modal-title">Tambah Lot Penerimaan Baru</h3>
+        <button class="modal-close" data-close-modal type="button">&times;</button>
+      </div>
+      <form id="formAddLot">
+        <div class="modal-body">
+          <div class="form-grid-2">
+            <div class="form-group">
+              <label for="addLotId">Kode Lot ID</label>
+              <input type="text" id="addLotId" required placeholder="L-0610-05">
+            </div>
+            <div class="form-group">
+              <label for="addLotBasis">Dasar Kontrak Pembelian</label>
+              <select id="addLotBasis">
+                <option value="kirim">Berdasarkan Berat Kirim</option>
+                <option value="hidup">Berdasarkan Berat Diterima RPHU</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="addLotFarmer">Pilih Mitra Peternak / Pemasok</label>
+            <select id="addLotFarmer" required></select>
+          </div>
+
+          <div class="form-grid-2">
+            <div class="form-group">
+              <label for="addLotBirds">Jumlah Ayam (Ekor)</label>
+              <input type="number" id="addLotBirds" required value="2500" min="1">
+            </div>
+            <div class="form-group">
+              <label for="addLotSendWeight">Berat Kirim Dari Kandang (kg)</label>
+              <input type="number" id="addLotSendWeight" required value="5125" step="0.1" min="1">
+            </div>
+          </div>
+
+          <div class="form-grid-2">
+            <div class="form-group">
+              <label for="addLotBasePrice">Harga Modal Beli (Rp/kg)</label>
+              <input type="number" id="addLotBasePrice" required value="21500" step="100">
+            </div>
+            <div class="form-group">
+              <label for="addLotSellPrice">Target Harga Jual Karkas (Rp/kg)</label>
+              <input type="number" id="addLotSellPrice" required value="36000" step="100">
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn" data-close-modal type="button">Batal</button>
+          <button class="btn btn-primary" type="submit">Simpan Lot Baru</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL EDIT PARAMETER LOT -->
+  <div class="modal-backdrop" id="modalEditLot">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 class="modal-title">Edit Parameter Lot Penerimaan</h3>
+        <button class="modal-close" data-close-modal type="button">&times;</button>
+      </div>
+      <form id="formEditLot">
+        <input type="hidden" id="editLotId">
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="editLotName">Nama Lot / Peternak</label>
+            <input type="text" id="editLotName" required>
+          </div>
+
+          <div class="form-grid-2">
+            <div class="form-group">
+              <label for="editLotBirds">Jumlah Ayam (Ekor)</label>
+              <input type="number" id="editLotBirds" required min="1">
+            </div>
+            <div class="form-group">
+              <label for="editLotSendWeight">Berat Kirim (kg)</label>
+              <input type="number" id="editLotSendWeight" required step="0.1" min="1">
+            </div>
+          </div>
+
+          <div class="form-grid-2">
+            <div class="form-group">
+              <label for="editLotBasePrice">Harga Modal Beli (Rp/kg)</label>
+              <input type="number" id="editLotBasePrice" required step="100">
+            </div>
+            <div class="form-group">
+              <label for="editLotSellPrice">Harga Jual Karkas (Rp/kg)</label>
+              <input type="number" id="editLotSellPrice" required step="100">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="editLotBasis">Dasar Kontrak Pembelian</label>
+            <select id="editLotBasis">
+              <option value="kirim">Berdasarkan Berat Kirim</option>
+              <option value="hidup">Berdasarkan Berat Diterima RPHU</option>
+            </select>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn" data-close-modal type="button">Batal</button>
+          <button class="btn btn-primary" type="submit">Simpan Perubahan</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL KONFIRMASI HAPUS LOT -->
+  <div class="modal-backdrop" id="modalDeleteLot">
+    <div class="modal-dialog modal-danger">
+      <div class="modal-header">
+        <h3 class="modal-title" style="color:var(--red);">Konfirmasi Hapus Lot</h3>
+        <button class="modal-close" data-close-modal type="button">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size:14px;color:var(--ink);line-height:1.5;">
+          Apakah Anda yakin ingin menghapus Lot <b id="deleteLotDesc" style="color:var(--red);">-</b>?
+        </p>
+        <p style="font-size:12.5px;color:var(--mute);margin-top:8px;">
+          Semua catatan akumulasi bobot dan kalkulasi finansial lot ini akan dihapus dari sistem operasional.
+        </p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn" data-close-modal type="button">Batal</button>
+        <button class="btn btn-danger" id="btnConfirmDeleteLot" type="button">Hapus Lot</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL KOREKSI BOBOT TIMBANGAN -->
+  <div class="modal-backdrop" id="modalCorrectWeighing">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 class="modal-title">Koreksi Nilai Timbangan (Audit Trail)</h3>
+        <button class="modal-close" data-close-modal type="button">&times;</button>
+      </div>
+      <form id="formCorrectWeighing">
+        <input type="hidden" id="correctLogLotId">
+        <input type="hidden" id="correctLogStage">
+        <div class="modal-body">
+          <div style="background:var(--panel-alt);border:1px solid var(--line);border-radius:var(--radius-sm);padding:12px;margin-bottom:14px;">
+            <div style="font-size:12px;color:var(--mute);text-transform:uppercase;">Tahap Penimbangan</div>
+            <b id="correctLogStageText" style="font-size:15px;color:var(--ink);">-</b>
+            <div style="font-size:12px;color:var(--mute);margin-top:6px;text-transform:uppercase;">Bobot Tercatat Saat Ini</div>
+            <b id="correctLogOldWeight" style="font-family:var(--font-mono);font-size:16px;color:var(--blue);">-</b>
+          </div>
+
+          <div class="form-group">
+            <label for="correctLogNewWeight">Bobot Baru Yang Benar (kg)</label>
+            <input type="number" id="correctLogNewWeight" required step="0.1" min="0.1" style="font-size:18px;font-family:var(--font-mono);font-weight:700;">
+          </div>
+
+          <div class="form-group">
+            <label for="correctLogReason">Alasan Koreksi / Catatan Supervisor</label>
+            <textarea id="correctLogReason" rows="2" placeholder="Contoh: Koreksi bobot tara keranjang kotor, tera ulang loadcell..."></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn" data-close-modal type="button">Batal</button>
+          <button class="btn btn-primary" type="submit">Simpan Koreksi</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL KONFIRMASI HAPUS TRANSAKSI TIMBANG -->
+  <div class="modal-backdrop" id="modalDeleteWeighing">
+    <div class="modal-dialog modal-danger">
+      <div class="modal-header">
+        <h3 class="modal-title" style="color:var(--red);">Hapus Rekaman Timbangan</h3>
+        <button class="modal-close" data-close-modal type="button">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size:14px;color:var(--ink);line-height:1.5;">
+          Apakah Anda yakin ingin menghapus rekaman timbangan <b id="deleteWeighingDesc" style="color:var(--red);">-</b>?
+        </p>
+        <p style="font-size:12.5px;color:var(--mute);margin-top:8px;">
+          Nilai timbangan ini akan dibatalkan dan bobot lot akan dikembalikan ke kondisi sebelumnya.
+        </p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn" data-close-modal type="button">Batal</button>
+        <button class="btn btn-danger" id="btnConfirmDeleteWeighing" type="button">Hapus Transaksi</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL PENGUJIAN HARDWARE ESP32 & SENSOR BEBAN -->
+  <div class="modal-backdrop" id="modalHardwareControl">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 class="modal-title">Panel Uji Hardware &amp; Telemetri ESP32</h3>
+        <button class="modal-close" data-close-modal type="button">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size:13px;color:var(--mute);margin-bottom:12px;line-height:1.4;">
+          Uji respon penimbangan sensor ESP32 secara interaktif. Beban yang dipilih akan dikirim ke node mikrokontroler dan ditampilkan pada indikator terminal timbangan secara real-time.
+        </p>
+
+        <div style="background:var(--panel-alt);border:1px solid var(--line);border-radius:var(--radius-sm);padding:12px;margin-bottom:14px;font-size:12.5px;">
+          <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+            <span>ID Node Timbangan:</span>
+            <b style="font-family:var(--font-mono);color:var(--blue);">SCALE-ESP32-01 (Dual Core 240MHz)</b>
+          </div>
+          <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+            <span>Arsitektur &amp; Filter:</span>
+            <span>FreeRTOS Core 1 · Moving Average (N=15)</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;">
+            <span>Status Koneksi Telemetri:</span>
+            <span style="color:var(--green);font-weight:600;" id="hwModalStatus">Telemetri Real-time Aktif</span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Preset Beban Cepat (Simulasi Fisik Load Cell)</label>
+          <div class="preset-load-grid">
+            <button class="btn-preset-load" type="button" onclick="WeighingEngine.sendHardwareLoad(0.0, true, 'Platform Kosong')">0 kg (Nol)</button>
+            <button class="btn-preset-load" type="button" onclick="WeighingEngine.sendHardwareLoad(24.5, true, 'Keranjang Kosong')">24.5 kg (Tara)</button>
+            <button class="btn-preset-load" type="button" onclick="WeighingEngine.sendHardwareLoad(50.0, true, 'Anak Timbang Tera')">50 kg (Tera)</button>
+            <button class="btn-preset-load" type="button" onclick="WeighingEngine.sendHardwareLoadForCurrentLot()">Target Lot Saat Ini</button>
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-top:14px;">
+          <label for="hwCustomWeight">Input Bobot Langsung ke Sensor ESP32 (kg)</label>
+          <div style="display:flex;gap:8px;">
+            <input type="number" id="hwCustomWeight" placeholder="Contoh: 4841.5" step="0.1" style="font-size:16px;font-family:var(--font-mono);font-weight:700;">
+            <button class="btn btn-primary" type="button" id="btnPushCustomWeight" style="white-space:nowrap;">Kirim ke Sensor</button>
+          </div>
+        </div>
+
+        <div style="display:flex;align-items:center;gap:10px;margin-top:12px;padding:8px 12px;background:var(--panel-alt);border-radius:var(--radius-sm);border:1px solid var(--line);">
+          <input type="checkbox" id="hwCheckVibrations" style="width:auto;cursor:pointer;">
+          <label for="hwCheckVibrations" style="margin:0;cursor:pointer;font-size:13px;text-transform:none;font-weight:500;">
+            Simulasikan kepakan getaran ayam sebelum stabil (2 detik)
+          </label>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn" data-close-modal type="button">Tutup Panel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- POP-UP SCANNER SURAT JALAN (KAMERA OCR & BARCODE) -->
+  <div class="modal-backdrop" id="modalScanSJ" style="z-index:99999;">
+    <div class="modal modal-lg" style="max-width:640px;border-radius:14px;overflow:hidden;box-shadow:0 25px 60px -15px rgba(0,0,0,0.3);border:1px solid rgba(255,255,255,0.15);max-height:92vh;display:flex;flex-direction:column;">
+      <div class="modal-header" style="display:flex;justify-content:space-between;align-items:center;padding:12px 18px;border-bottom:1px solid var(--line);background:linear-gradient(to right, rgba(37,99,235,0.05), transparent);flex-shrink:0;">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div style="width:34px;height:34px;border-radius:8px;background:rgba(37,99,235,0.12);display:flex;align-items:center;justify-content:center;color:var(--blue);font-size:18px;">
+            📷
+          </div>
+          <div>
+            <h3 class="modal-title" style="margin:0;font-size:16px;font-weight:700;">
+              Pop-up Pemindai Surat Jalan (DO)
+            </h3>
+            <div style="font-size:11.5px;color:var(--mute);display:flex;align-items:center;gap:6px;margin-top:2px;">
+              <span class="scan-pulse-dot"></span>
+              <span id="popupScanStatusText" style="color:#10b981;font-weight:600;">Status: Siap Memindai Dokumen</span>
+            </div>
+          </div>
+          <span id="cameraActiveBadge" style="display:none;background:#ef4444;color:#fff;font-size:11px;font-weight:700;padding:3px 9px;border-radius:12px;animation:pulse 1.2s infinite;cursor:pointer;" onclick="ScanSuratJalan.stopCamera()" title="Klik untuk langsung matikan kamera">
+            🔴 Kamera ON (Klik Matikan)
+          </span>
+        </div>
+        <button class="modal-close" data-close-modal onclick="ScanSuratJalan.closeModal()" type="button" title="Tutup Pop-up &amp; Matikan Kamera">&times;</button>
+      </div>
+
+      <div class="modal-body" style="padding:14px 18px;overflow-y:auto;max-height:calc(92vh - 120px);">
+        <!-- Navigasi Tab Mode Pemindaian Pop-up -->
+        <div class="scan-tab-nav">
+          <button class="scan-tab-btn active" id="tabBtn_kamera" type="button" onclick="ScanSuratJalan.switchTab('kamera')">
+            <span>📸</span> <span>Foto Kamera (OCR)</span>
+          </button>
+          <button class="scan-tab-btn" id="tabBtn_barcode" type="button" onclick="ScanSuratJalan.switchTab('barcode')">
+            <span>📟</span> <span>Tembak Barcode DO</span>
+          </button>
+          <button class="scan-tab-btn" id="tabBtn_preset" type="button" onclick="ScanSuratJalan.switchTab('preset')">
+            <span>📑</span> <span>Dokumen Supir Tiba</span>
+          </button>
+        </div>
+
+        <!-- PANE 1: KAMERA / FOTO DOKUMEN FISIK -->
+        <div id="pane_kamera" style="display:block;">
+          <!-- Switcher Mode Kamera & Device Selector -->
+          <div class="camera-mode-switcher">
+            <div style="display:flex;gap:6px;align-items:center;">
+              <button type="button" class="cam-mode-btn active" id="btnModeLiveCam" onclick="ScanSuratJalan.switchToLiveMode()">
+                📹 Kamera Live Webcam
+              </button>
+              <button type="button" class="cam-mode-btn" id="btnModeSimulated" onclick="ScanSuratJalan.switchToSimulatedMode()">
+                📄 Simulasi Dokumen DO
+              </button>
+            </div>
+            <div style="display:flex;gap:6px;align-items:center;">
+              <button type="button" class="btn btn-sm btn-outline" onclick="ScanSuratJalan.toggleMirror()" title="Cerminkan tampilan webcam" style="font-size:11px;padding:3px 8px;">
+                🪞 Mirror
+              </button>
+              <select id="selCameraDevice" onchange="ScanSuratJalan.startCamera(this.value)" style="display:none;font-size:11px;padding:3px 8px;border-radius:6px;background:var(--panel-alt);color:var(--ink);border:1px solid var(--line);max-width:160px;">
+              </select>
+            </div>
+          </div>
+
+          <div class="viewfinder-camera-box" id="viewfinderCameraBox">
+            <!-- HUD Atas Kamera Live -->
+            <div class="camera-top-hud">
+              <div class="camera-live-badge-top" id="cameraLiveBadgeTop">
+                <span class="hud-dot"></span>
+                <span>LIVE WEBCAM AKTIF</span>
+              </div>
+              <div class="camera-hint-top" id="cameraHintTop">
+                <span>🎯 Arahkan Kamera ke Surat Jalan</span>
+              </div>
+            </div>
+
+            <!-- Video Stream Kamera Fisik -->
+            <video id="scannerVideo" autoplay playsinline muted></video>
+            
+            <!-- Reticle Titik Fokus Kamera Tengah -->
+            <div class="camera-center-reticle" id="cameraCenterReticle"></div>
+
+            <!-- Bingkai Panduan Dokumen Surat Jalan -->
+            <div class="camera-guide-frame">
+              <div class="camera-guide-corner corner-tl"></div>
+              <div class="camera-guide-corner corner-tr"></div>
+              <div class="camera-guide-corner corner-bl"></div>
+              <div class="camera-guide-corner corner-br"></div>
+            </div>
+
+            <!-- Kilatan Rana Kamera (Flash) -->
+            <div class="camera-shutter-flash" id="cameraShutterFlash"></div>
+
+            <!-- Animasi Pas Lagi Nge-Analisis (Laser & HUD OCR) -->
+            <div class="ocr-analysis-overlay" id="ocrAnalysisOverlay" style="display:none;">
+              <div class="ocr-laser-beam"></div>
+              <div class="ocr-target-box" style="top:22%;left:12%;width:190px;height:24px;">[NO. DO: SCANNING...]</div>
+              <div class="ocr-target-box" style="top:40%;left:12%;width:150px;height:24px;">[NOPOL: SCANNING...]</div>
+              <div class="ocr-target-box" style="top:58%;left:12%;width:130px;height:24px;">[EKOR: DETECTING]</div>
+              <div class="ocr-target-box" style="top:58%;right:12%;width:140px;height:24px;">[BOBOT KG: DETECTING]</div>
+
+              <div class="ocr-status-card">
+                <div class="ocr-status-title">
+                  <span style="display:inline-block;animation:spin 1s linear infinite;">⚙️</span>
+                  <span>Menganalisis Surat Jalan...</span>
+                </div>
+                <div class="ocr-status-step" id="ocrStatusStep">
+                  🔍 [1/3] Mendeteksi batas lembar fisik Surat Jalan...
+                </div>
+                <div class="ocr-progress-track">
+                  <div class="ocr-progress-fill" id="ocrProgressFill"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Viewfinder Dokumen Fisik Surat Jalan di Lensa Kamera -->
+            <div id="cameraPlaceholder" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;position:absolute;inset:0;z-index:1;">
+              <!-- Disuntikkan secara dinamis oleh ScanSuratJalan.renderSimulatedDocInViewfinder() -->
+            </div>
+          </div>
+
+          <!-- Pilihan Contoh Dokumen untuk Pengujian Kamera (Khusus Mode Simulasi) -->
+          <div class="doc-selector-pills" id="docSelectorPills" style="display:none;">
+            <span style="font-size:11px;color:var(--mute);font-weight:600;">Ganti Sampel DO:</span>
+            <button type="button" class="doc-pill-btn active" id="pill_subang1" onclick="ScanSuratJalan.setSimulatedPreset('subang1')">
+              Subang (2.500 Ekor)
+            </button>
+            <button type="button" class="doc-pill-btn" id="pill_subang2" onclick="ScanSuratJalan.setSimulatedPreset('subang2')">
+              Barokah (3.200 Ekor)
+            </button>
+            <button type="button" class="doc-pill-btn" id="pill_sukabumi" onclick="ScanSuratJalan.setSimulatedPreset('sukabumi')">
+              Sukabumi (2.800 Ekor)
+            </button>
+          </div>
+
+          <!-- Tombol Aksi Kamera (Ambil Foto & Matikan Kamera) -->
+          <div class="camera-controls-bar" id="cameraControlsBar">
+            <button class="btn-shutter-capture" type="button" onclick="ScanSuratJalan.captureAndAnalyze()">
+              📸 Ambil Foto Surat Jalan
+            </button>
+            <button class="btn-camera-off" id="btnToggleOrStopCam" type="button" onclick="ScanSuratJalan.stopCamera()" title="Matikan kamera sekarang">
+              🛑 Matikan Kamera
+            </button>
+          </div>
+        </div>
+
+        <!-- PANE 2: TEMBAK BARCODE / MANUAL INPUT -->
+        <div id="pane_barcode" style="display:none;">
+          <div class="barcode-laser-box">
+            <div class="laser-line"></div>
+            <div style="font-size:38px;margin-bottom:8px;">📟</div>
+            <h4 style="margin:0 0 6px;color:var(--ink);font-size:15.5px;font-weight:700;">
+              Scanner Barcode Laser Fisik
+            </h4>
+            <p style="font-size:12.5px;color:var(--mute);margin:0 0 16px;max-width:440px;margin-left:auto;margin-right:auto;">
+              Tembakkan alat pemindai barcode USB/Wireless Anda langsung ke barcode atau QR pada lembar Surat Jalan supir.
+            </p>
+            <div style="max-width:440px;margin:0 auto;display:flex;gap:8px;">
+              <input type="text" id="modalBarcodeInput" class="scanner-barcode-input" placeholder="Tembak barcode / ketik No. DO di sini..." autocomplete="off">
+              <button class="btn btn-primary" type="button" onclick="ScanSuratJalan.handleRawInput(document.getElementById('modalBarcodeInput').value)">
+                Proses &rarr;
+              </button>
+            </div>
+            <div style="margin-top:10px;font-size:11.5px;color:var(--mute);">
+              Tekan Enter pada scanner atau keyboard untuk langsung memproses.
+            </div>
+          </div>
+        </div>
+
+        <!-- PANE 3: PILIH DOKUMEN SUPIR (PRESET CEPAT) -->
+        <div id="pane_preset" style="display:none;">
+          <div style="font-size:12px;color:var(--mute);margin-bottom:10px;">
+            Pilih surat jalan dari armada yang baru tiba di dermaga untuk langsung diverifikasi sistem:
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+            <button class="preset-sj-btn" type="button" onclick="ScanSuratJalan.scanPresetWithAnalysis('subang1')">
+              <b style="color:var(--ink);font-size:12.5px;">PT Unggas Jaya Bersama</b>
+              <span style="font-size:11px;color:var(--mute);">Truk: B 9421 KDA &middot; 2.500 Ekor (5.120 kg)</span>
+              <span style="color:var(--blue);font-size:11px;font-weight:700;margin-top:2px;">Foto &amp; Analisis Dokumen &rarr;</span>
+            </button>
+            <button class="preset-sj-btn" type="button" onclick="ScanSuratJalan.scanPresetWithAnalysis('subang2')">
+              <b style="color:var(--ink);font-size:12.5px;">CV Barokah Subang Unggas</b>
+              <span style="font-size:11px;color:var(--mute);">Truk: D 8812 AB &middot; 3.200 Ekor (6.560 kg)</span>
+              <span style="color:var(--blue);font-size:11px;font-weight:700;margin-top:2px;">Foto &amp; Analisis Dokumen &rarr;</span>
+            </button>
+            <button class="preset-sj-btn" type="button" onclick="ScanSuratJalan.scanPresetWithAnalysis('sukabumi')">
+              <b style="color:var(--ink);font-size:12.5px;">Peternakan Mandiri Broiler</b>
+              <span style="font-size:11px;color:var(--mute);">Truk: F 8234 XY &middot; 2.800 Ekor (5.600 kg)</span>
+              <span style="color:var(--blue);font-size:11px;font-weight:700;margin-top:2px;">Foto &amp; Analisis Dokumen &rarr;</span>
+            </button>
+            <button class="preset-sj-btn" type="button" onclick="ScanSuratJalan.scanPresetWithAnalysis('bogor')">
+              <b style="color:var(--ink);font-size:12.5px;">Kemitraan Ternak Utama</b>
+              <span style="font-size:11px;color:var(--mute);">Truk: B 9102 TGA &middot; 2.000 Ekor (4.100 kg)</span>
+              <span style="color:var(--blue);font-size:11px;font-weight:700;margin-top:2px;">Foto &amp; Analisis Dokumen &rarr;</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Wadah Hasil Pindai di Dalam Modal (Setelah Analisis Selesai) -->
+        <div id="modalScanResult" style="display:none;"></div>
+      </div>
+
+      <div class="modal-footer" style="display:flex;justify-content:space-between;align-items:center;padding:12px 18px;border-top:1px solid var(--line);">
+        <button class="btn btn-danger" id="btnFooterStopCam" type="button" onclick="ScanSuratJalan.stopCamera()" style="display:none;font-weight:700;background:#dc2626;color:#ffffff;border:none;">
+          🛑 Matikan Kamera
+        </button>
+        <button class="btn" data-close-modal onclick="ScanSuratJalan.closeModal()" type="button" style="margin-left:auto;">
+          ✕ Tutup Pop-up (ESC)
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footers & Scripts -->
+  <script src="../assets/js/paho-mqtt.min.js"></script>
+  <script src="../assets/js/api.js"></script>
+  <script src="../assets/js/auth.js"></script>
+  <script src="../assets/js/lot.js"></script>
+  <script src="../assets/js/surat-jalan.js?v=2.6"></script>
+  <script src="../assets/js/weighing.js"></script>
+  <script src="../assets/js/dashboard.js"></script>
+  <script src="../assets/js/reports.js"></script>
+  <script src="../assets/js/app.js"></script>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      await LotStore.init();
+      DashboardUI.init();
+      WeighingEngine.init();
+      if (window.ScanSuratJalan) ScanSuratJalan.init();
+
+      // Quick export handlers
+      const btnExportExcel = document.getElementById('btnExportQuickExcel');
+      if (btnExportExcel) {
+        btnExportExcel.addEventListener('click', () => {
+          ReportEngine.exportExcel(LotStore.getAll());
+        });
+      }
+
+      const btnExport = document.getElementById('btnExportQuick');
+      if (btnExport) {
+        btnExport.addEventListener('click', () => {
+          ReportEngine.exportCSV(LotStore.getAll());
+        });
+      }
+    });
+  </script>
+</body>
+</html>

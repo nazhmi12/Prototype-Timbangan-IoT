@@ -1,0 +1,54 @@
+### Test API Health Check
+GET http://localhost:8000/api/v1
+Accept: application/json
+
+### Test Auth Login
+POST http://localhost:8000/api/v1/auth/login
+Content-Type: application/json
+
+{
+  "user_id": "petugas_01",
+  "password": "password123",
+  "station": "Timbang truk",
+  "shift": "Pagi"
+}
+
+### Test Get Overview Dashboard
+GET http://localhost:8000/api/v1/dashboard/overview
+Accept: application/json
+
+### Test Get Lots
+GET http://localhost:8000/api/v1/lots
+Accept: application/json
+
+### Test Get Single Lot
+GET http://localhost:8000/api/v1/lots/L-0610-01
+Accept: application/json
+
+### Test Record Weighing
+POST http://localhost:8000/api/v1/weighings
+Content-Type: application/json
+
+{
+  "lot_id": "L-0610-01",
+  "stage": "hidup",
+  "weight_kg": 4845.5,
+  "device_id": "SCALE-ESP32-01",
+  "notes": "Uji coba via REST Client"
+}
+
+### Test Get Today Weighing Logs
+GET http://localhost:8000/api/v1/weighings/today
+Accept: application/json
+
+### Test Get Devices
+GET http://localhost:8000/api/v1/devices
+Accept: application/json
+
+### Test Send Tare Command to Scale
+POST http://localhost:8000/api/v1/devices/SCALE-ESP32-01/command
+Content-Type: application/json
+
+{
+  "action": "tare"
+}

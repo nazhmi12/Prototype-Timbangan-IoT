@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Laporan &amp; Analisis Susut – Sistem Timbang RPHU</title>
+  <link rel="stylesheet" href="../assets/css/main.css">
+  <link rel="stylesheet" href="../assets/css/dashboard.css">
+  <link rel="stylesheet" href="../assets/css/responsive.css">
+</head>
+<body>
+  <div class="top-strip"></div>
+  <header class="hdr">
+    <div class="brand">
+      <div class="brand-logo-badge">RPHU</div>
+      <div class="brand-text">
+        <b>RPHU MODERN</b>
+        <small>Smart Poultry System</small>
+      </div>
+      <div class="sys-title">
+        Sistem Timbang dan Susut RPHU
+        <span class="sys-badge">Laporan Harian &amp; Bulanan</span>
+      </div>
+      <div class="station-pill">
+        <span class="dot-online"></span>
+        <span>Stasiun: <b id="currentStationLabel">Laporan RPHU</b></span>
+      </div>
+    </div>
+    <div class="header-status">
+      <div class="seg-toggle" role="group" aria-label="Mode tampilan">
+        <button data-m="light" aria-pressed="false" type="button">Terang</button>
+        <button data-m="dark" aria-pressed="false" type="button">Gelap</button>
+      </div>
+
+      <!-- Pojok Kanan Atas: Tanggal/Waktu & Profil Operator -->
+      <div class="header-right-corner">
+        <div class="header-datetime" title="Waktu Sistem Operasional">
+          <span id="tgl"></span>
+        </div>
+        <div class="user-profile">
+          <span class="user-name" id="currentUserLabel">Supervisor</span>
+          <button class="btn-logout" id="btnLogout" type="button">Keluar</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="app-container">
+    <aside class="sidebar">
+      <nav aria-label="Menu Navigasi">
+        <div class="nav-section-title">Operasional</div>
+        <a href="penerimaan-ayam.html">Penerimaan ayam</a>
+        <a href="timbang-susut.html">Timbang &amp; susut</a>
+        <a href="produksi.html">Produksi</a>
+        <a href="cold-storage.html">Stok cold storage</a>
+        <a href="penjualan.html">Penjualan</a>
+
+        <div class="nav-section-title">Data &amp; Laporan</div>
+        <a href="dashboard.html">Dashboard KPI</a>
+        <a href="peternak.html">Peternak</a>
+        <a href="laporan.html" class="active">Laporan</a>
+
+        <div class="nav-section-title">Administrasi Sistem</div>
+        <a href="users.html">Manajemen User</a>
+        <a href="log-aktivitas.html">Log Aktivitas</a>
+      </nav>
+      <div class="sidebar-footer">
+        <p><b>Divisi Pengendalian Mutu &amp; Finansial</b><br>Rumah Potong Hewan Unggas</p>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <div class="crumb">Beranda / Laporan / Rekapitulasi Susut &amp; Finansial</div>
+      
+      <!-- PRINT ONLY: KOP SURAT RESMI RPHU -->
+      <div class="print-only print-kop">
+        <div class="print-kop-title">RUMAH POTONG HEWAN UNGGAS (RPHU) MODERN</div>
+        <div class="print-kop-sub">DIVISI PENGENDALIAN MUTU &amp; LOGISTIK RPHU</div>
+        <div style="font-size:12.5pt;font-weight:700;color:#c8102e;margin-top:4px;">
+          LAPORAN REKAPITULASI PENIMBANGAN &amp; ANALISIS SUSUT BOBOT AYAM
+        </div>
+        <div style="font-size:9pt;color:#64748b;margin-top:2px;">
+          Standar Mutu SNI 01-3924-1995 &amp; Permentan No. 11/2020 | Dokumen Resmi Audit Mutu &amp; Finansial
+        </div>
+      </div>
+      <div class="print-only print-meta-grid" id="printMetaGrid"></div>
+
+      <div class="page-header">
+        <div>
+          <h2 class="page-title">Laporan Akumulasi Susut &amp; Analisis Finansial</h2>
+          <p style="font-size:13px;color:var(--mute);margin-top:2px;">
+            Rekapitulasi resmi penyusutan transit, hasil karkas dingin, dan varians laba/rugi per lot
+          </p>
+        </div>
+        <div class="page-actions">
+          <button class="btn btn-primary" id="btnExportExcel" type="button" title="Unduh spreadsheet Excel resmi">
+            Ekspor Excel (.xls)
+          </button>
+          <button class="btn" id="btnExportCSV" type="button" title="Unduh data tabel CSV">
+            Ekspor CSV (.csv)
+          </button>
+          <button class="btn" id="btnOpenExportModal" type="button">
+            Opsi Ekspor
+          </button>
+          <button class="btn" onclick="ReportEngine.printReport()" type="button" title="Cetak dokumen resmi">
+            Cetak / PDF
+          </button>
+        </div>
+      </div>
+
+      <!-- Filter Panel -->
+      <section class="box">
+        <div class="box-header">
+          <span>Filter Periode &amp; Parameter Laporan</span>
+          <span style="font-size:12px;opacity:0.85;">Menyesuaikan data tabel dan file ekspor</span>
+        </div>
+        <div class="pricing-toolbar" style="grid-template-columns: repeat(3, 1fr);">
+          <div>
+            <label for="filterDate">Tanggal Operasional</label>
+            <input type="date" id="filterDate">
+          </div>
+          <div>
+            <label for="filterPeternak">Pemasok / Peternak</label>
+            <select id="filterPeternak">
+              <option value="all">Semua Mitra Peternak</option>
+            </select>
+          </div>
+          <div>
+            <label for="filterStatus">Status Pemrosesan Lot</label>
+            <select id="filterStatus">
+              <option value="all">Semua Status Lot</option>
+              <option value="completed">Selesai (Karkas Dingin)</option>
+              <option value="processing">Sedang Berjalan</option>
+              <option value="waiting">Menunggu Timbang</option>
+            </select>
+          </div>
+        </div>
+      </section>
+
+      <!-- Ringkasan Akumulasi Laporan (Dynamic KPIs) -->
+      <div class="kpi-row">
+        <div class="kpi-card">
+          <div class="kpi-card-label">Total Ekor Diolah</div>
+          <div class="kpi-card-value" id="kpiReportBirds">0 Ekor</div>
+          <div class="kpi-card-sub" id="kpiReportSendKg">Berat Kirim: 0 kg</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-card-label">Rata-rata Susut Transit</div>
+          <div class="kpi-card-value" id="kpiReportTransit">0.00%</div>
+          <div class="kpi-card-sub" id="kpiReportTransitKg">Total Susut: 0 kg</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-card-label">Total Kerugian Susut (Rp)</div>
+          <div class="kpi-card-value" id="kpiReportLoss">Rp 0</div>
+          <div class="kpi-card-sub">
+            <span class="kpi-badge kpi-badge-alert">Moneter</span>
+            <span>Nilai Riil Susut</span>
+          </div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-card-label">Estimasi Laba Kotor</div>
+          <div class="kpi-card-value" id="kpiReportProfit">Rp 0</div>
+          <div class="kpi-card-sub">
+            <span class="kpi-badge kpi-badge-good">Margin</span>
+            <span>Harga Kontrak</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tabel Laporan Komprehensif -->
+      <section class="box">
+        <div class="box-header">
+          <span>Tabel Rincian Susut Bobot &amp; Keuangan per Lot</span>
+          <span style="font-size:12px;opacity:0.85;" id="reportRowCount">Menampilkan 0 Lot</span>
+        </div>
+        <div class="table-wrapper">
+          <table style="min-width:1150px;">
+            <thead>
+              <tr>
+                <th class="text-left">Lot ID</th>
+                <th class="text-left">Peternak / Pemasok</th>
+                <th class="text-right">Ekor</th>
+                <th class="text-right">Kirim (kg)</th>
+                <th class="text-right">Terima (kg)</th>
+                <th class="text-right">Susut Tr. (%)</th>
+                <th class="text-right">Basah (kg)</th>
+                <th class="text-right">Dingin (kg)</th>
+                <th class="text-right">Susut Total (%)</th>
+                <th class="text-right">Yield (%)</th>
+                <th class="text-right">Modal (Rp)</th>
+                <th class="text-right">Hasil Jual (Rp)</th>
+                <th class="text-right">Rugi Susut (Rp)</th>
+                <th class="text-right">Laba Kotor (Rp)</th>
+                <th class="text-center">Status</th>
+              </tr>
+            </thead>
+            <tbody id="reportRows"></tbody>
+            <tfoot id="reportFoot"></tfoot>
+          </table>
+        </div>
+      </section>
+
+      <!-- PRINT ONLY: LEMBAR TANDA TANGAN VERIFIKASI AUDIT -->
+      <div class="print-only print-signatures">
+        <div class="print-sig-col">
+          <div>Dibuat Oleh,</div>
+          <b>Petugas Timbang RPHU</b>
+          <div class="print-sig-space"></div>
+          <div class="print-sig-name">Ahmad Fauzi</div>
+          <div class="print-sig-npp">NPP: 2021.08.104</div>
+        </div>
+        <div class="print-sig-col">
+          <div>Diperiksa Oleh,</div>
+          <b>Supervisor QC &amp; Susut</b>
+          <div class="print-sig-space"></div>
+          <div class="print-sig-name">Budi Santoso</div>
+          <div class="print-sig-npp">NPP: 2018.03.022</div>
+        </div>
+        <div class="print-sig-col">
+          <div>Mengetahui,</div>
+          <b>Kepala Unit RPHU</b>
+          <div class="print-sig-space"></div>
+          <div class="print-sig-name">Ir. Hendra Gunawan, M.M.</div>
+          <div class="print-sig-npp">NPP: 2012.01.005</div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Modal Pilihan Format Ekspor -->
+  <div class="modal-backdrop" id="modalExportChoice">
+    <div class="modal-dialog" style="max-width: 720px;">
+      <div class="modal-header">
+        <div>
+          <h3 class="modal-title">Format Ekspor Dokumen</h3>
+          <p style="font-size: 12.5px; color: var(--mute); margin-top: 2px;">
+            Pilih format dokumen resmi untuk pelaporan operasional RPHU Modern
+          </p>
+        </div>
+        <button class="modal-close" id="btnCloseExportModal" type="button">&times;</button>
+      </div>
+      <div class="modal-body" style="padding: 18px 22px;">
+        <div style="display: grid; grid-template-columns: 1fr; gap: 12px;">
+          <!-- Pilihan 1: Excel Spreadsheet -->
+          <div style="border: 1px solid var(--line-strong); border-radius: var(--radius-md); padding: 16px; background: var(--panel);">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; flex-wrap: wrap;">
+              <div style="flex: 1; min-width: 260px;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <b style="font-size: 14.5px; color: var(--ink);">Spreadsheet Microsoft Excel (.xls)</b>
+                  <span style="background: var(--blue-subtle); color: var(--blue); font-size: 11px; font-weight: 600; padding: 2px 7px; border-radius: 4px;">
+                    Format Resmi
+                  </span>
+                </div>
+                <p style="font-size: 12.5px; color: var(--ink-secondary); margin: 6px 0 8px 0; line-height: 1.5;">
+                  Dokumen spreadsheet terformat dengan Kop Surat RPHU Modern, styling warna terstandar, indikator susut, dan lembar verifikasi audit.
+                </p>
+                <div style="font-size: 11.5px; color: var(--mute); display: flex; gap: 14px; flex-wrap: wrap;">
+                  <span>• Kop Surat Resmi RPHU</span>
+                  <span>• Alert Susut &gt; 3%</span>
+                  <span>• Tanda Tangan 3 Pejabat</span>
+                </div>
+              </div>
+              <button class="btn btn-primary" id="btnModalDownloadExcel" type="button" style="white-space: nowrap; padding: 8px 16px;">
+                Unduh Excel (.xls)
+              </button>
+            </div>
+          </div>
+
+          <!-- Pilihan 2: CSV Data File -->
+          <div style="border: 1px solid var(--line); border-radius: var(--radius-md); padding: 16px; background: var(--panel);">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; flex-wrap: wrap;">
+              <div style="flex: 1; min-width: 260px;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <b style="font-size: 14.5px; color: var(--ink);">Tabel Data CSV (.csv)</b>
+                  <span style="background: var(--zebra); color: var(--mute); font-size: 11px; font-weight: 600; padding: 2px 7px; border-radius: 4px;">
+                    UTF-8 · Delimiter Titik-Koma
+                  </span>
+                </div>
+                <p style="font-size: 12.5px; color: var(--ink-secondary); margin: 6px 0 8px 0; line-height: 1.5;">
+                  Format data tabel terstandarisasi dengan pemisah titik-koma, blok metadata 4-kolom presisi, dan indikator status mutu terformat.
+                </p>
+                <div style="font-size: 11.5px; color: var(--mute); display: flex; gap: 14px; flex-wrap: wrap;">
+                  <span>• Kompatibel Excel/SPSS/Python</span>
+                  <span>• Format Angka Rupiah</span>
+                  <span>• 21 Kolom Data Presisi</span>
+                </div>
+              </div>
+              <button class="btn" id="btnModalDownloadCSV" type="button" style="white-space: nowrap; padding: 8px 16px;">
+                Unduh CSV (.csv)
+              </button>
+            </div>
+          </div>
+
+          <!-- Pilihan 3: Print / PDF -->
+          <div style="border: 1px solid var(--line); border-radius: var(--radius-md); padding: 14px 16px; background: var(--panel);">
+            <div style="display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap;">
+              <div>
+                <b style="font-size: 14px; color: var(--ink);">Cetak / Ekspor PDF Resmi</b>
+                <p style="font-size: 12px; color: var(--mute); margin: 3px 0 0 0;">
+                  Format A4 Landscape siap cetak atau simpan sebagai dokumen PDF resmi.
+                </p>
+              </div>
+              <button class="btn" id="btnModalPrint" type="button" style="white-space: nowrap; padding: 8px 16px;">
+                Cetak / PDF
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer" style="display: flex; justify-content: space-between; align-items: center;">
+        <span style="font-size: 12px; color: var(--mute);">
+          Format .xls untuk laporan visual manajemen, format .csv untuk interoperabilitas data.
+        </span>
+        <button class="btn" id="btnCloseExportModalBottom" type="button">Tutup</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="../assets/js/api.js"></script>
+  <script src="../assets/js/auth.js"></script>
+  <script src="../assets/js/lot.js"></script>
+  <script src="../assets/js/reports.js"></script>
+  <script src="../assets/js/app.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      await Promise.all([FarmerStore.init(), LotStore.init()]);
+
+      // Set default tanggal hari ini
+      const dateEl = document.getElementById('filterDate');
+      if (dateEl) {
+        dateEl.value = new Date().toISOString().slice(0, 10);
+      }
+
+      // Populate filter peternak
+      const selPeternak = document.getElementById('filterPeternak');
+      if (selPeternak) {
+        const farmers = FarmerStore.getAll();
+        selPeternak.innerHTML = '<option value="all">Semua Mitra Peternak</option>' + 
+          farmers.map(f => `<option value="${f.name}">${f.farmer_code} – ${f.name}</option>`).join('');
+      }
+
+      // Update print metadata grid
+      const metaGrid = document.getElementById('printMetaGrid');
+      if (metaGrid) {
+        const meta = ReportEngine.getMetadata();
+        metaGrid.innerHTML = `
+          <div><b>No. Dokumen:</b> ${meta.docNo}</div>
+          <div><b>Tanggal Operasional:</b> ${meta.date}</div>
+          <div><b>Stasiun &amp; Shift:</b> ${meta.station} · ${meta.shift}</div>
+          <div><b>Petugas:</b> ${meta.operator}</div>
+        `;
+      }
+
+      function getFilteredLots() {
+        let lots = LotStore.getAll();
+        const pVal = selPeternak ? selPeternak.value : 'all';
+        const sVal = document.getElementById('filterStatus') ? document.getElementById('filterStatus').value : 'all';
+
+        if (pVal !== 'all') {
+          lots = lots.filter(l => l.nama && l.nama.toLowerCase().includes(pVal.toLowerCase()));
+        }
+
+        if (sVal !== 'all') {
+          lots = lots.filter(l => (l.status || 'waiting') === sVal);
+        }
+
+        return lots;
+      }
+
+      function renderReport() {
+        const tbody = document.getElementById('reportRows');
+        const tfoot = document.getElementById('reportFoot');
+        const countEl = document.getElementById('reportRowCount');
+        if (!tbody) return;
+
+        const lots = getFilteredLots();
+        if (countEl) countEl.textContent = `Menampilkan ${lots.length} Lot`;
+
+        const summary = ReportEngine.calculateSummary(lots);
+
+        // Update KPIs
+        const elBirds = document.getElementById('kpiReportBirds');
+        const elSendKg = document.getElementById('kpiReportSendKg');
+        const elTransit = document.getElementById('kpiReportTransit');
+        const elTransitKg = document.getElementById('kpiReportTransitKg');
+        const elLoss = document.getElementById('kpiReportLoss');
+        const elProfit = document.getElementById('kpiReportProfit');
+
+        if (elBirds) elBirds.textContent = `${LotStore.f(summary.totalEkor)} Ekor`;
+        if (elSendKg) elSendKg.textContent = `Berat Kirim: ${LotStore.f(summary.sumKirim, 1)} kg`;
+        if (elTransit) elTransit.textContent = `${LotStore.f(summary.avgTransitPct, 2)}%`;
+        if (elTransitKg) elTransitKg.textContent = `Total Susut: ${LotStore.f(summary.susutTransitKg, 1)} kg`;
+        if (elLoss) elLoss.textContent = LotStore.rp(summary.totalRugiSusut);
+        if (elProfit) elProfit.textContent = LotStore.rp(summary.totalLaba);
+
+        if (lots.length === 0) {
+          tbody.innerHTML = `
+            <tr>
+              <td colspan="15" style="text-align:center;padding:24px;color:var(--mute);">
+                Tidak ada data lot yang sesuai dengan filter yang dipilih.
+              </td>
+            </tr>
+          `;
+          if (tfoot) tfoot.innerHTML = '';
+          return;
+        }
+
+        tbody.innerHTML = lots.map(l => {
+          const t = LotStore.calcTransit(l);
+          const tt = LotStore.calcTotal(l);
+          const y = LotStore.calcYield(l);
+          const fin = LotStore.calcFinancial(l);
+
+          const statusBadge = l.status === 'completed'
+            ? '<span class="badge badge-success">Selesai</span>'
+            : (l.status === 'processing'
+              ? '<span class="badge badge-info">Proses</span>'
+              : '<span class="badge badge-warning">Menunggu</span>');
+
+          return `
+            <tr>
+              <td class="text-left"><code style="font-weight:700;color:var(--ink);">${l.id}</code></td>
+              <td class="text-left" style="font-weight:600;color:var(--ink);">${l.nama}</td>
+              <td class="text-right">${LotStore.f(l.ekor)} ekor</td>
+              <td class="text-right">${LotStore.f(l.kirim, 1)}</td>
+              <td class="text-right" style="font-weight:600;">${l.hidup != null ? LotStore.f(l.hidup, 1) : '–'}</td>
+              <td class="text-right ${t != null && t > 3.0 ? 'neg' : ''}"><b>${t == null ? '–' : LotStore.f(t, 2) + '%'}</b></td>
+              <td class="text-right">${l.basah != null ? LotStore.f(l.basah, 1) : '–'}</td>
+              <td class="text-right">${l.dingin != null ? LotStore.f(l.dingin, 1) : '–'}</td>
+              <td class="text-right">${tt == null ? '–' : LotStore.f(tt, 2) + '%'}</td>
+              <td class="text-right ${y != null && y >= 68 ? 'pos' : ''}"><b>${y == null ? '–' : LotStore.f(y, 1) + '%'}</b></td>
+              <td class="text-right" style="font-family:var(--font-mono);">${LotStore.rp(fin.modal)}</td>
+              <td class="text-right" style="font-family:var(--font-mono);">${LotStore.rp(fin.jual)}</td>
+              <td class="text-right ${fin.rs != null && fin.rs > 0 ? 'neg' : ''}" style="font-family:var(--font-mono);"><b>${LotStore.rp(fin.rs)}</b></td>
+              <td class="text-right ${fin.laba != null && fin.laba < 0 ? 'neg' : (fin.laba != null ? 'pos' : '')}" style="font-family:var(--font-mono);"><b>${LotStore.rp(fin.laba)}</b></td>
+              <td class="text-center">${statusBadge}</td>
+            </tr>
+          `;
+        }).join('');
+
+        if (tfoot) {
+          tfoot.innerHTML = `
+            <tr>
+              <td colspan="2"><b>Total Akumulasi</b></td>
+              <td style="text-align:right;"><b>${LotStore.f(summary.totalEkor)}</b></td>
+              <td style="text-align:right;"><b>${LotStore.f(summary.sumKirim, 1)}</b></td>
+              <td style="text-align:right;"><b>${LotStore.f(summary.sumHidup, 1)}</b></td>
+              <td style="text-align:right;color:var(--blue);"><b>${LotStore.f(summary.avgTransitPct, 2)}%</b></td>
+              <td style="text-align:right;"><b>${LotStore.f(summary.sumBasah, 1)}</b></td>
+              <td style="text-align:right;"><b>${LotStore.f(summary.sumDingin, 1)}</b></td>
+              <td style="text-align:right;"><b>${LotStore.f(summary.avgTotalSusutPct, 2)}%</b></td>
+              <td style="text-align:right;color:var(--green);"><b>${LotStore.f(summary.avgYieldPct, 1)}%</b></td>
+              <td style="text-align:right;"><b>${LotStore.rp(summary.totalModal)}</b></td>
+              <td style="text-align:right;"><b>${LotStore.rp(summary.totalJual)}</b></td>
+              <td style="text-align:right;" class="neg"><b>${LotStore.rp(summary.totalRugiSusut)}</b></td>
+              <td style="text-align:right;" class="${summary.totalLaba < 0 ? 'neg' : 'pos'}"><b>${LotStore.rp(summary.totalLaba)}</b></td>
+              <td style="text-align:center;"><b>${lots.length} Lot</b></td>
+            </tr>
+          `;
+        }
+      }
+
+      renderReport();
+
+      // Listeners for filters
+      if (selPeternak) selPeternak.addEventListener('change', renderReport);
+      const selStatus = document.getElementById('filterStatus');
+      if (selStatus) selStatus.addEventListener('change', renderReport);
+
+      // Export Excel Button
+      const btnExportExcel = document.getElementById('btnExportExcel');
+      if (btnExportExcel) {
+        btnExportExcel.addEventListener('click', () => {
+          ReportEngine.exportExcel(getFilteredLots());
+        });
+      }
+
+      // Export CSV Button
+      const btnExportCSV = document.getElementById('btnExportCSV');
+      if (btnExportCSV) {
+        btnExportCSV.addEventListener('click', () => {
+          ReportEngine.exportCSV(getFilteredLots());
+        });
+      }
+
+      // Export Choice Modal Handlers
+      const modalExportChoice = document.getElementById('modalExportChoice');
+      const btnOpenExportModal = document.getElementById('btnOpenExportModal');
+      const btnCloseExportModal = document.getElementById('btnCloseExportModal');
+      const btnCloseExportModalBottom = document.getElementById('btnCloseExportModalBottom');
+      const btnModalDownloadExcel = document.getElementById('btnModalDownloadExcel');
+      const btnModalDownloadCSV = document.getElementById('btnModalDownloadCSV');
+      const btnModalPrint = document.getElementById('btnModalPrint');
+
+      function openExportModal() {
+        if (modalExportChoice) modalExportChoice.classList.add('open');
+      }
+      function closeExportModal() {
+        if (modalExportChoice) modalExportChoice.classList.remove('open');
+      }
+
+      if (btnOpenExportModal) btnOpenExportModal.addEventListener('click', openExportModal);
+      if (btnCloseExportModal) btnCloseExportModal.addEventListener('click', closeExportModal);
+      if (btnCloseExportModalBottom) btnCloseExportModalBottom.addEventListener('click', closeExportModal);
+      if (modalExportChoice) {
+        modalExportChoice.addEventListener('click', (e) => {
+          if (e.target === modalExportChoice) closeExportModal();
+        });
+      }
+
+      if (btnModalDownloadExcel) {
+        btnModalDownloadExcel.addEventListener('click', () => {
+          ReportEngine.exportExcel(getFilteredLots());
+          closeExportModal();
+        });
+      }
+
+      if (btnModalDownloadCSV) {
+        btnModalDownloadCSV.addEventListener('click', () => {
+          ReportEngine.exportCSV(getFilteredLots());
+          closeExportModal();
+        });
+      }
+
+      if (btnModalPrint) {
+        btnModalPrint.addEventListener('click', () => {
+          closeExportModal();
+          ReportEngine.printReport();
+        });
+      }
+    });
+  </script>
+</body>
+</html>

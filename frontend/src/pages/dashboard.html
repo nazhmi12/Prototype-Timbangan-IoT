@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Dashboard Utama – Sistem Timbang &amp; Susut RPHU</title>
+  <link rel="stylesheet" href="../assets/css/main.css?v=20261013_corner">
+  <link rel="stylesheet" href="../assets/css/dashboard.css?v=20261013_corner">
+  <link rel="stylesheet" href="../assets/css/responsive.css?v=20261013_corner">
+</head>
+<body>
+  <div class="top-strip"></div>
+  <header class="hdr">
+    <div class="brand">
+      <div class="brand-logo-badge">RPHU</div>
+      <div class="brand-text">
+        <b>Rumah Potong</b>
+        <small>Group By</small>
+      </div>
+      <div class="sys-title">
+        Sistem Timbang dan Susut RPHU
+        <span class="sys-badge">Executive View</span>
+      </div>
+      <div class="station-pill">
+        <span class="dot-online"></span>
+        <span>Stasiun: <b id="currentStationLabel">Kantor / Dashboard</b></span>
+      </div>
+    </div>
+    <div class="header-status">
+      <div class="seg-toggle" role="group" aria-label="Mode tampilan">
+        <button data-m="light" aria-pressed="false" type="button">Terang</button>
+        <button data-m="dark" aria-pressed="false" type="button">Gelap</button>
+      </div>
+
+      <!-- Pojok Kanan Atas: Tanggal/Waktu & Profil Operator -->
+      <div class="header-right-corner">
+        <div class="header-datetime" title="Waktu Sistem Operasional">
+          <span id="tgl"></span>
+        </div>
+        <div class="user-profile">
+          <span class="user-name" id="currentUserLabel">Supervisor</span>
+          <button class="btn-logout" id="btnLogout" type="button">Keluar</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="app-container">
+    <aside class="sidebar">
+      <nav aria-label="Menu Navigasi">
+        <div class="nav-section-title">Operasional</div>
+        <a href="penerimaan-ayam.html">Penerimaan ayam</a>
+        <a href="timbang-susut.html">Timbang &amp; susut</a>
+        <a href="produksi.html">Produksi</a>
+        <a href="cold-storage.html">Stok cold storage</a>
+        <a href="penjualan.html">Penjualan</a>
+
+        <div class="nav-section-title">Data &amp; Laporan</div>
+        <a href="dashboard.html" class="active">Dashboard KPI</a>
+        <a href="peternak.html">Peternak</a>
+        <a href="laporan.html">Laporan</a>
+
+        <div class="nav-section-title">Administrasi Sistem</div>
+        <a href="users.html">Manajemen User</a>
+        <a href="log-aktivitas.html">Log Aktivitas</a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <p><b>RPHU Industrial Telemetry</b><br>
+        Sistem Timbang &amp; Susut<br>
+        RPHU Modern Automation</p>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <div class="crumb">Beranda / Dashboard Ringkasan Eksekutif</div>
+      <div class="page-header">
+        <div>
+          <h2 class="page-title">Ringkasan Operasional &amp; Efisiensi RPHU</h2>
+          <p style="color:var(--mute);font-size:13px;margin:2px 0 0 0;">Monitoring data penimbangan, susut bobot transit, dan yield karkas harian.</p>
+        </div>
+        <div class="page-actions" style="display:flex;align-items:center;gap:12px;">
+          <!-- Pojok Kanan Atas Halaman Home: Info Tanggal & Operator Aktif -->
+          <div class="home-operator-card" id="homeOperatorCard" title="Status Sesi Kerja Home">
+            <div class="hoc-date">
+              <span id="homeHeroDate">Memuat tanggal...</span>
+            </div>
+            <div class="hoc-user">
+              <span id="homeHeroUser">Petugas: <b>Supervisor</b></span>
+            </div>
+          </div>
+          <a href="timbang-susut.html" class="btn btn-primary">Buka Stasiun Timbang</a>
+        </div>
+      </div>
+
+      <!-- KPI Cards Row -->
+      <div class="kpi-row">
+        <div class="kpi-card">
+          <div class="kpi-card-label">Total Ayam Diterima Hari Ini</div>
+          <div class="kpi-card-value" id="kpiBirds">0 Ekor</div>
+          <div class="kpi-card-sub">
+            <span class="kpi-badge">Hari Ini</span>
+            <span id="kpiTruckCount">0 Truk Pengiriman</span>
+          </div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-card-label">Rata-rata Susut Transit</div>
+          <div class="kpi-card-value" id="kpiTransit">0.00%</div>
+          <div class="kpi-card-sub">
+            <span class="kpi-badge kpi-badge-normal">Normal</span>
+            <span>Optimal &le; 2.50%</span>
+          </div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-card-label">Rata-rata Yield Karkas</div>
+          <div class="kpi-card-value" id="kpiYield">0.0%</div>
+          <div class="kpi-card-sub">
+            <span class="kpi-badge kpi-badge-good">SNI Tercapai</span>
+            <span>Standar 68% &ndash; 74%</span>
+          </div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-card-label">Estimasi Kerugian Susut</div>
+          <div class="kpi-card-value" id="kpiLoss">Rp 0</div>
+          <div class="kpi-card-sub">
+            <span class="kpi-badge kpi-badge-alert">Dampak Biaya</span>
+            <span>Nilai Moneter Riil</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Grid 2 Kolom: Grafik Susut & Status Hardware -->
+      <div style="display:grid; grid-template-columns: 1.4fr 1fr; gap: 20px; margin-bottom: 22px;">
+        <!-- Visualisasi Perbandingan Susut Lot -->
+        <section class="box">
+          <div class="box-header">
+            <span>Perbandingan Susut Transit &amp; Yield Karkas per Lot</span>
+            <span style="font-size:12px;opacity:0.85;">Analitik Visual</span>
+          </div>
+          <div class="box-body">
+            <div id="chartContainer">
+              <!-- Dynamically populated by DashboardUI.renderChart() -->
+            </div>
+          </div>
+        </section>
+
+        <!-- Status Hardware Stasiun IoT -->
+        <section class="box">
+          <div class="box-header">
+            <span>Status Stasiun &amp; Telemetri IoT</span>
+            <span style="font-size:12px;opacity:0.85;">2 Node Terhubung</span>
+          </div>
+          <div class="box-body" style="padding:14px;">
+            <div style="border:1px solid var(--line);border-radius:var(--radius-sm);padding:12px;margin-bottom:10px;background:var(--panel);">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+                <b style="color:var(--blue)">SCALE-ESP32-01</b>
+                <span class="station-pill" style="font-size:11px;padding:2px 6px;">
+                  <span class="dot-online"></span> ONLINE
+                </span>
+              </div>
+              <p style="font-size:13px;color:var(--mute);margin:0;">
+                Platform Penerimaan Ayam · IP: 192.168.1.105<br>
+                Sampling: 80 Hz · Filter: Moving Average (N=15)<br>
+                Latency MQTT: 14 ms
+              </p>
+            </div>
+
+            <div style="border:1px solid var(--line);border-radius:var(--radius-sm);padding:12px;background:var(--panel);">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+                <b style="color:var(--blue)">SCALE-ESP32-02</b>
+                <span class="station-pill" style="font-size:11px;padding:2px 6px;">
+                  <span class="dot-online"></span> ONLINE
+                </span>
+              </div>
+              <p style="font-size:13px;color:var(--mute);margin:0;">
+                Timbangan Cold Storage Chiller · IP: 192.168.1.106<br>
+                Sampling: 10 Hz · Suhu Ruang: 1.8°C<br>
+                Latency MQTT: 18 ms
+              </p>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <!-- Ringkasan Cepat Seluruh Lot Hari Ini -->
+      <section class="box">
+        <div class="box-header">
+          <span>Status Seluruh Lot Aktif Hari Ini</span>
+          <a href="timbang-susut.html" style="color:white;font-size:12px;text-decoration:none;">Buka Detail Stasiun &rarr;</a>
+        </div>
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th class="text-left">Lot ID</th>
+                <th class="text-left">Peternak / Pemasok</th>
+                <th class="text-right">Ekor</th>
+                <th class="text-right">Berat Kirim (kg)</th>
+                <th class="text-right">Hidup Diterima (kg)</th>
+                <th class="text-right">Susut Transit</th>
+                <th class="text-right">Karkas Basah (kg)</th>
+                <th class="text-right">Karkas Dingin (kg)</th>
+                <th class="text-right">Susut Total</th>
+                <th class="text-right">Yield Karkas</th>
+                <th class="text-center" style="min-width:110px;">Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="rows"></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="../assets/js/api.js"></script>
+  <script src="../assets/js/auth.js"></script>
+  <script src="../assets/js/lot.js"></script>
+  <script src="../assets/js/dashboard.js?v=20261013_corner"></script>
+  <script src="../assets/js/app.js?v=20261013_corner"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      LotStore.init();
+      DashboardUI.init();
+    });
+  </script>
+</body>
+</html>

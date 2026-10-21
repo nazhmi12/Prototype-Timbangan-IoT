@@ -1,0 +1,39 @@
+# Operating System & IDE Files
+.DS_Store
+Thumbs.db
+*.swp
+*~
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.bak
+__pycache__/
+*.py[cod]
+
+# PlatformIO & Embedded Firmware
+firmware/esp32-weighing-scale/.pio/
+firmware/esp32-weighing-scale/.vscode/
+firmware/esp32-weighing-scale/lib/*/.pio/
+
+# Environment Variables
+.env
+backend/.env
+
+# Backend PHP & Composer
+backend/vendor/
+backend/storage/logs/*.log
+backend/storage/exports/*.csv
+backend/storage/exports/*.xlsx
+backend/storage/exports/*.pdf
+composer.phar
+
+# Node & Frontend (if applicable)
+node_modules/
+npm-debug.log*
+
+# Database Storage
+docker/mysql/data/
+database/backups/*.sql.gz

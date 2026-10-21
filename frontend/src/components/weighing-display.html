@@ -1,0 +1,32 @@
+<!-- Industrial Scale Indicator HUD Component -->
+<div class="terminal-hud" aria-label="Layar Indikator Timbangan Digital Industri">
+  <div class="terminal-header">
+    <div class="terminal-indicators">
+      <span class="hud-badge" id="badgeStable">STABLE</span>
+      <span class="hud-badge" id="badgeTare">TARE</span>
+      <span class="hud-badge" id="badgeNet">NET</span>
+      <span class="hud-badge active-stable" id="badgeGross">GROSS</span>
+    </div>
+    <div style="font-family: var(--font-mono); font-size: 11px; color: #64748b;">
+      SCALE-ESP32-01 · 80 SPS
+    </div>
+  </div>
+
+  <div class="terminal-display" aria-live="polite">
+    <b class="terminal-number" id="readNumber">0.0</b>
+    <i class="terminal-unit">kg</i>
+  </div>
+
+  <div class="terminal-stability-bar" title="Indikator Konvergensi Moving Average Filter">
+    <div class="stability-progress" id="stabilityProgress"></div>
+  </div>
+
+  <div class="terminal-footer-info">
+    <span id="readInfo">Pilih lot dan tahap, lalu tekan 'Baca timbangan'.</span>
+  </div>
+
+  <div class="terminal-controls-row">
+    <button class="btn-terminal" id="btnZero" type="button" title="Kalibrasi titik nol">ZERO</button>
+    <button class="btn-terminal" id="btnTare" type="button" title="Nol-kan wadah keranjang">TARE</button>
+  </div>
+</div>

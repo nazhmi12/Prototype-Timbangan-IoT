@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Penerimaan Ayam – Sistem Timbang RPHU</title>
+  <link rel="stylesheet" href="../assets/css/main.css">
+  <link rel="stylesheet" href="../assets/css/dashboard.css?v=2.4">
+  <link rel="stylesheet" href="../assets/css/responsive.css">
+</head>
+<body>
+  <div class="top-strip"></div>
+  <header class="hdr">
+    <div class="brand">
+      <div class="brand-logo-badge">RPHU</div>
+      <div class="brand-text">
+        <b>RPHU MODERN</b>
+        <small>Smart Poultry System</small>
+      </div>
+      <div class="sys-title">
+        Sistem Timbang dan Susut RPHU
+        <span class="sys-badge">Dermaga Bongkar</span>
+      </div>
+      <div class="station-pill">
+        <span class="dot-online"></span>
+        <span>Stasiun: <b id="currentStationLabel">Penerimaan Ayam</b></span>
+      </div>
+    </div>
+    <div class="header-status">
+      <div class="seg-toggle" role="group" aria-label="Mode tampilan">
+        <button data-m="light" aria-pressed="false" type="button">Terang</button>
+        <button data-m="dark" aria-pressed="false" type="button">Gelap</button>
+      </div>
+
+      <!-- Pojok Kanan Atas: Tanggal/Waktu & Profil Operator -->
+      <div class="header-right-corner">
+        <div class="header-datetime" title="Waktu Sistem Operasional">
+          <span id="tgl"></span>
+        </div>
+        <div class="user-profile">
+          <span class="user-name" id="currentUserLabel">Operator</span>
+          <button class="btn-logout" id="btnLogout" type="button">Keluar</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="app-container">
+    <aside class="sidebar">
+      <nav aria-label="Menu Navigasi">
+        <div class="nav-section-title">Operasional</div>
+        <a href="penerimaan-ayam.html" class="active">Penerimaan ayam</a>
+        <a href="timbang-susut.html">Timbang &amp; susut</a>
+        <a href="produksi.html">Produksi</a>
+        <a href="cold-storage.html">Stok cold storage</a>
+        <a href="penjualan.html">Penjualan</a>
+
+        <div class="nav-section-title">Data &amp; Laporan</div>
+        <a href="dashboard.html">Dashboard KPI</a>
+        <a href="peternak.html">Peternak</a>
+        <a href="laporan.html">Laporan</a>
+
+        <div class="nav-section-title">Administrasi Sistem</div>
+        <a href="users.html">Manajemen User</a>
+        <a href="log-aktivitas.html">Log Aktivitas</a>
+      </nav>
+      <div class="sidebar-footer">
+        <p><b>Stasiun Penerimaan</b><br>Dermaga Bongkar Muat Truk RPHU</p>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <div class="crumb">Beranda / Operasional / Penerimaan Ayam Hidup</div>
+      <div class="page-header">
+        <div>
+          <h2 class="page-title">Penerimaan &amp; Verifikasi Surat Jalan Ayam</h2>
+          <p style="font-size:13px;color:var(--mute);margin-top:2px;">
+            Pindai surat jalan fisik supir untuk pencatatan otomatis kedatangan dan penimbangan langsung
+          </p>
+        </div>
+        <div class="page-actions" style="display:flex;gap:10px;align-items:center;">
+          <button class="btn btn-primary" id="btnHeaderOpenScan" type="button" onclick="ScanSuratJalan.openModal('kamera')" style="display:inline-flex;align-items:center;gap:7px;font-weight:700;background:linear-gradient(135deg,#2563eb,#1d4ed8);box-shadow:0 2px 10px rgba(37,99,235,0.35);">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+              <circle cx="12" cy="13" r="4"></circle>
+            </svg>
+            Buka Pop-up Scanner
+          </button>
+          <a href="timbang-susut.html" class="btn">Stasiun Timbang &rarr;</a>
+        </div>
+      </div>
+
+      <!-- SMART SCANNER SURAT JALAN & VERIFIKASI CEPAT -->
+      <section class="scanner-hero-card" style="background:linear-gradient(135deg, rgba(37,99,235,0.08), rgba(16,185,129,0.06));border:1.5px solid rgba(37,99,235,0.3);box-shadow:0 6px 20px rgba(0,0,0,0.08);">
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:14px;">
+          <div>
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+              <span class="scan-pulse-dot"></span>
+              <span style="font-size:12px;font-weight:700;color:#10b981;text-transform:uppercase;letter-spacing:0.5px;">Scanner Ready (Kamera OCR &amp; Barcode Laser)</span>
+              <span style="font-size:11px;color:var(--mute);">&middot; Stasiun Penerimaan &amp; Dermaga RPHU</span>
+            </div>
+            <h3 style="font-size:19px;font-weight:800;color:var(--ink);margin:0 0 4px;">
+              Pindai Dokumen Surat Jalan (DO) Supir
+            </h3>
+            <p style="font-size:13px;color:var(--mute);margin:0;max-width:600px;">
+              Buka pop-up pemindai interaktif untuk memotret fisik Surat Jalan supir via kamera OCR, tembak barcode laser fisik, atau verifikasi kedatangan truk untuk langsung ditimbang.
+            </p>
+          </div>
+          
+          <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+            <button class="btn btn-primary" id="btnOpenScanModal" type="button" onclick="ScanSuratJalan.openModal('kamera')" style="font-size:14px;padding:10px 20px;font-weight:700;display:flex;align-items:center;gap:8px;background:linear-gradient(135deg,#2563eb,#1d4ed8);box-shadow:0 4px 14px rgba(37,99,235,0.4);border-radius:8px;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+                <circle cx="12" cy="13" r="4"></circle>
+              </svg>
+              <span>Buka Pop-up Scanner (Scan Surat Jalan) &rarr;</span>
+            </button>
+            <button class="btn btn-danger" id="btnHeaderStopCam" type="button" onclick="ScanSuratJalan.stopCamera()" style="display:none;font-size:13px;padding:9px 14px;font-weight:700;align-items:center;gap:6px;">
+              🛑 Matikan Kamera
+            </button>
+            <input type="file" id="fileUploadSJ" accept="image/*" style="display:none;" onchange="ScanSuratJalan.handleFileUpload(event)">
+            <button class="btn" type="button" onclick="document.getElementById('fileUploadSJ').click()" style="font-size:13px;padding:9px 14px;">
+              Unggah Foto DO
+            </button>
+          </div>
+        </div>
+
+        <div style="margin-top:16px;border-top:1px dashed var(--line);padding-top:12px;">
+          <div style="font-size:11.5px;font-weight:700;color:var(--mute);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">
+            Atau Pilih Dokumen Supir yang Baru Tiba di Dermaga (Langsung Buka Pop-up &amp; Analisis):
+          </div>
+          <div class="preset-sj-grid">
+            <button class="preset-sj-btn" type="button" onclick="ScanSuratJalan.scanPresetWithAnalysis('subang1')">
+              <div class="sj-name">PT Unggas Jaya Bersama (Subang)</div>
+              <div class="sj-meta">
+                <span>Truk: <b>B 9421 KDA</b> (Sukirman)</span>
+                <span class="sj-weight">5.120 kg</span>
+              </div>
+              <div style="font-size:11px;color:var(--mute);">2.500 Ekor &middot; 125 Keranjang</div>
+              <span style="display:inline-block;margin-top:4px;font-size:10.5px;padding:2px 6px;background:rgba(37,99,235,0.1);color:var(--blue);border-radius:4px;font-weight:600;">Buka Pop-up &amp; Analisis &rarr;</span>
+            </button>
+
+            <button class="preset-sj-btn" type="button" onclick="ScanSuratJalan.scanPresetWithAnalysis('subang2')">
+              <div class="sj-name">CV Barokah Subang Unggas</div>
+              <div class="sj-meta">
+                <span>Truk: <b>D 8812 AB</b> (Bambang)</span>
+                <span class="sj-weight">6.560 kg</span>
+              </div>
+              <div style="font-size:11px;color:var(--mute);">3.200 Ekor &middot; 160 Keranjang</div>
+              <span style="display:inline-block;margin-top:4px;font-size:10.5px;padding:2px 6px;background:rgba(37,99,235,0.1);color:var(--blue);border-radius:4px;font-weight:600;">Buka Pop-up &amp; Analisis &rarr;</span>
+            </button>
+
+            <button class="preset-sj-btn" type="button" onclick="ScanSuratJalan.scanPresetWithAnalysis('sukabumi')">
+              <div class="sj-name">Peternakan Mandiri Broiler (Sukabumi)</div>
+              <div class="sj-meta">
+                <span>Truk: <b>F 8234 XY</b> (Dedi M.)</span>
+                <span class="sj-weight">5.600 kg</span>
+              </div>
+              <div style="font-size:11px;color:var(--mute);">2.800 Ekor &middot; 140 Keranjang</div>
+              <span style="display:inline-block;margin-top:4px;font-size:10.5px;padding:2px 6px;background:rgba(37,99,235,0.1);color:var(--blue);border-radius:4px;font-weight:600;">Buka Pop-up &amp; Analisis &rarr;</span>
+            </button>
+
+            <button class="preset-sj-btn" type="button" onclick="ScanSuratJalan.scanPresetWithAnalysis('bogor')">
+              <div class="sj-name">Kemitraan Ternak Utama (Bogor)</div>
+              <div class="sj-meta">
+                <span>Truk: <b>B 9102 TGA</b> (Agus W.)</span>
+                <span class="sj-weight">4.100 kg</span>
+              </div>
+              <div style="font-size:11px;color:var(--mute);">2.000 Ekor &middot; 100 Keranjang</div>
+              <span style="display:inline-block;margin-top:4px;font-size:10.5px;padding:2px 6px;background:rgba(37,99,235,0.1);color:var(--blue);border-radius:4px;font-weight:600;">Buka Pop-up &amp; Analisis &rarr;</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Kontainer Preview Surat Jalan Hasil Scan -->
+        <div id="scannedPreviewContainer" style="display:none;"></div>
+      </section>
+
+      <!-- Form Input Kedatangan Truk Baru -->
+      <section class="box">
+        <div class="box-header">
+          <span>Pencatatan Kedatangan Truk / Lot Baru (Manual / Terverifikasi)</span>
+          <span style="font-size:12px;opacity:0.85;">Formulir Administrasi Dermaga</span>
+        </div>
+        <div class="box-body">
+          <form id="formPenerimaan" onsubmit="event.preventDefault(); App.toast('Lot baru berhasil didaftarkan!', 'success');">
+            <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 14px;">
+              <div>
+                <label for="lotCode">Nomor Lot RPHU</label>
+                <input type="text" id="lotCode" value="L-0610-01" readonly style="background:var(--zebra);font-weight:700;">
+              </div>
+              <div>
+                <label for="noPol">Nomor Polisi Truk</label>
+                <input type="text" id="noPol" placeholder="Contoh: B 9421 KDA" required>
+              </div>
+              <div>
+                <label for="peternakNama">Peternak / Asal Kandang</label>
+                <select id="peternakNama">
+                  <option value="">Memuat mitra peternak...</option>
+                </select>
+              </div>
+              <div>
+                <label for="jumlahEkor">Jumlah Ekor (Surat Jalan)</label>
+                <input type="number" id="jumlahEkor" placeholder="2500" required>
+              </div>
+            </div>
+
+            <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 16px;">
+              <div>
+                <label for="bobotKirim">Bobot Kirim di Kandang (kg)</label>
+                <input type="number" id="bobotKirim" placeholder="5120.0" step="0.1" required>
+              </div>
+              <div>
+                <label for="jumlahKeranjang">Jumlah Keranjang (Crates)</label>
+                <input type="number" id="jumlahKeranjang" placeholder="125" required>
+              </div>
+              <div>
+                <label for="sopir">Nama Pengemudi / Sopir</label>
+                <input type="text" id="sopir" placeholder="Bpk. Sukirman">
+              </div>
+            </div>
+
+            <div style="display:flex;gap:10px;">
+              <button type="submit" class="btn btn-primary">
+                Simpan Data Kedatangan Truk
+              </button>
+            </div>
+          </form>
+        </div>
+      </section>
+
+      <!-- Daftar Truk Kedatangan Hari Ini -->
+      <section class="box">
+        <div class="box-header">
+          <span>Antrian Truk di Dermaga Bongkar Hari Ini</span>
+        </div>
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th class="text-left">No. Lot</th>
+                <th class="text-left">Peternak &amp; Armada</th>
+                <th class="text-right">Ekor</th>
+                <th class="text-right">Bobot Kirim</th>
+                <th class="text-right">Bobot Terima RPHU</th>
+                <th class="text-right">Susut Transit</th>
+                <th class="text-center">Status Bongkar</th>
+                <th class="text-center">Aksi Operasional</th>
+              </tr>
+            </thead>
+            <tbody id="trukQueueBody">
+              <tr><td colspan="8" style="text-align:center;padding:24px;color:var(--mute);">Memuat antrian truk dermaga...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- MODAL POP-UP SCANNER & ANALISIS SURAT JALAN -->
+  <div class="modal-backdrop" id="modalScanSJ" style="z-index:99999;" onclick="if (event.target === this) ScanSuratJalan.closeModal()">
+    <div class="modal-dialog" style="max-width:620px;max-height:92vh;display:flex;flex-direction:column;">
+      <!-- Header Pop-up yang Jelas & Informatif -->
+      <div class="modal-header" style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--line);padding:12px 18px;flex-shrink:0;">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div style="width:34px;height:34px;border-radius:8px;background:rgba(37,99,235,0.12);display:flex;align-items:center;justify-content:center;font-size:18px;color:var(--blue);">
+            📷
+          </div>
+          <div>
+            <h3 class="modal-title" style="margin:0;font-size:16px;font-weight:700;">
+              Pop-up Pemindai Surat Jalan (DO)
+            </h3>
+            <div style="font-size:11.5px;color:var(--mute);display:flex;align-items:center;gap:6px;margin-top:2px;">
+              <span class="scan-pulse-dot"></span>
+              <span id="popupScanStatusText" style="color:#10b981;font-weight:600;">Status: Siap Memindai Dokumen</span>
+            </div>
+          </div>
+          <span id="cameraActiveBadge" style="display:none;background:#ef4444;color:#fff;font-size:11px;font-weight:700;padding:3px 9px;border-radius:12px;animation:pulse 1.2s infinite;cursor:pointer;" onclick="ScanSuratJalan.stopCamera()" title="Klik untuk langsung matikan kamera">
+            🔴 Kamera ON (Klik Matikan)
+          </span>
+        </div>
+        <button class="modal-close" data-close-modal onclick="ScanSuratJalan.closeModal()" type="button" title="Tutup Pop-up &amp; Matikan Kamera">&times;</button>
+      </div>
+
+      <div class="modal-body" style="padding:14px 18px;overflow-y:auto;max-height:calc(92vh - 120px);">
+        <!-- Navigasi Tab Mode Pemindaian Pop-up -->
+        <div class="scan-tab-nav">
+          <button class="scan-tab-btn active" id="tabBtn_kamera" type="button" onclick="ScanSuratJalan.switchTab('kamera')">
+            <span>📸</span> <span>Foto Kamera (OCR)</span>
+          </button>
+          <button class="scan-tab-btn" id="tabBtn_barcode" type="button" onclick="ScanSuratJalan.switchTab('barcode')">
+            <span>📟</span> <span>Tembak Barcode DO</span>
+          </button>
+          <button class="scan-tab-btn" id="tabBtn_preset" type="button" onclick="ScanSuratJalan.switchTab('preset')">
+            <span>📑</span> <span>Dokumen Supir Tiba</span>
+          </button>
+        </div>
+
+        <!-- PANE 1: KAMERA / FOTO DOKUMEN FISIK -->
+        <div id="pane_kamera" style="display:block;">
+          <!-- Switcher Mode Kamera & Device Selector -->
+          <div class="camera-mode-switcher">
+            <div style="display:flex;gap:6px;align-items:center;">
+              <button type="button" class="cam-mode-btn active" id="btnModeLiveCam" onclick="ScanSuratJalan.switchToLiveMode()">
+                📹 Kamera Live Webcam
+              </button>
+              <button type="button" class="cam-mode-btn" id="btnModeSimulated" onclick="ScanSuratJalan.switchToSimulatedMode()">
+                📄 Simulasi Dokumen DO
+              </button>
+            </div>
+            <div style="display:flex;gap:6px;align-items:center;">
+              <button type="button" class="btn btn-sm btn-outline" onclick="ScanSuratJalan.toggleMirror()" title="Cerminkan tampilan webcam" style="font-size:11px;padding:3px 8px;">
+                🪞 Mirror
+              </button>
+              <select id="selCameraDevice" onchange="ScanSuratJalan.startCamera(this.value)" style="display:none;font-size:11px;padding:3px 8px;border-radius:6px;background:var(--panel-alt);color:var(--ink);border:1px solid var(--line);max-width:160px;">
+              </select>
+            </div>
+          </div>
+
+          <div class="viewfinder-camera-box" id="viewfinderCameraBox">
+            <!-- HUD Atas Kamera Live -->
+            <div class="camera-top-hud">
+              <div class="camera-live-badge-top" id="cameraLiveBadgeTop">
+                <span class="hud-dot"></span>
+                <span>LIVE WEBCAM AKTIF</span>
+              </div>
+              <div class="camera-hint-top" id="cameraHintTop">
+                <span>🎯 Arahkan Kamera ke Surat Jalan</span>
+              </div>
+            </div>
+
+            <!-- Video Stream Kamera Fisik -->
+            <video id="scannerVideo" autoplay playsinline muted></video>
+            
+            <!-- Reticle Titik Fokus Kamera Tengah -->
+            <div class="camera-center-reticle" id="cameraCenterReticle"></div>
+
+            <!-- Bingkai Panduan Dokumen Surat Jalan -->
+            <div class="camera-guide-frame">
+              <div class="camera-guide-corner corner-tl"></div>
+              <div class="camera-guide-corner corner-tr"></div>
+              <div class="camera-guide-corner corner-bl"></div>
+              <div class="camera-guide-corner corner-br"></div>
+            </div>
+
+            <!-- Kilatan Rana Kamera (Flash) -->
+            <div class="camera-shutter-flash" id="cameraShutterFlash"></div>
+
+            <!-- Animasi Pas Lagi Nge-Analisis (Laser & HUD OCR) -->
+            <div class="ocr-analysis-overlay" id="ocrAnalysisOverlay" style="display:none;">
+              <div class="ocr-laser-beam"></div>
+              <div class="ocr-target-box" style="top:22%;left:12%;width:190px;height:24px;">[NO. DO: SCANNING...]</div>
+              <div class="ocr-target-box" style="top:40%;left:12%;width:150px;height:24px;">[NOPOL: SCANNING...]</div>
+              <div class="ocr-target-box" style="top:58%;left:12%;width:130px;height:24px;">[EKOR: DETECTING]</div>
+              <div class="ocr-target-box" style="top:58%;right:12%;width:140px;height:24px;">[BOBOT KG: DETECTING]</div>
+
+              <div class="ocr-status-card">
+                <div class="ocr-status-title">
+                  <span style="display:inline-block;animation:spin 1s linear infinite;">⚙️</span>
+                  <span>Menganalisis Surat Jalan...</span>
+                </div>
+                <div class="ocr-status-step" id="ocrStatusStep">
+                  🔍 [1/3] Mendeteksi batas lembar fisik Surat Jalan...
+                </div>
+                <div class="ocr-progress-track">
+                  <div class="ocr-progress-fill" id="ocrProgressFill"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Viewfinder Dokumen Fisik Surat Jalan di Lensa Kamera -->
+            <div id="cameraPlaceholder" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;position:absolute;inset:0;z-index:1;">
+              <!-- Disuntikkan secara dinamis oleh ScanSuratJalan -->
+            </div>
+          </div>
+
+          <!-- Pilihan Contoh Dokumen untuk Pengujian Kamera (Mode Simulasi) -->
+          <div class="doc-selector-pills" id="docSelectorPills" style="display:none;">
+            <span style="font-size:11px;color:var(--mute);font-weight:600;">Ganti Sampel DO:</span>
+            <button type="button" class="doc-pill-btn active" id="pill_subang1" onclick="ScanSuratJalan.setSimulatedPreset('subang1')">
+              Subang (2.500 Ekor)
+            </button>
+            <button type="button" class="doc-pill-btn" id="pill_subang2" onclick="ScanSuratJalan.setSimulatedPreset('subang2')">
+              Barokah (3.200 Ekor)
+            </button>
+            <button type="button" class="doc-pill-btn" id="pill_sukabumi" onclick="ScanSuratJalan.setSimulatedPreset('sukabumi')">
+              Sukabumi (2.800 Ekor)
+            </button>
+          </div>
+
+          <!-- Tombol Aksi Kamera (Ambil Foto & Matikan Kamera) -->
+          <div class="camera-controls-bar" id="cameraControlsBar">
+            <button class="btn-shutter-capture" type="button" onclick="ScanSuratJalan.captureAndAnalyze()">
+              📸 Ambil Foto Surat Jalan
+            </button>
+            <button class="btn-camera-off" id="btnToggleOrStopCam" type="button" onclick="ScanSuratJalan.stopCamera()" title="Matikan kamera sekarang">
+              🛑 Matikan Kamera
+            </button>
+          </div>
+        </div>
+
+        <!-- PANE 2: TEMBAK BARCODE / MANUAL INPUT -->
+        <div id="pane_barcode" style="display:none;">
+          <div class="barcode-laser-box">
+            <div class="laser-line"></div>
+            <div style="font-size:38px;margin-bottom:8px;">📟</div>
+            <h4 style="margin:0 0 6px;color:var(--ink);font-size:15.5px;font-weight:700;">
+              Scanner Barcode Laser Fisik
+            </h4>
+            <p style="font-size:12.5px;color:var(--mute);margin:0 0 16px;max-width:440px;margin-left:auto;margin-right:auto;">
+              Tembakkan alat pemindai barcode USB/Wireless Anda langsung ke barcode atau QR pada lembar Surat Jalan supir.
+            </p>
+            <div style="max-width:440px;margin:0 auto;display:flex;gap:8px;">
+              <input type="text" id="modalBarcodeInput" class="scanner-barcode-input" placeholder="Tembak barcode / ketik No. DO di sini..." autocomplete="off">
+              <button class="btn btn-primary" type="button" onclick="ScanSuratJalan.handleRawInput(document.getElementById('modalBarcodeInput').value)">
+                Proses &rarr;
+              </button>
+            </div>
+            <div style="margin-top:10px;font-size:11.5px;color:var(--mute);">
+              Tekan Enter pada scanner atau keyboard untuk langsung memproses.
+            </div>
+          </div>
+        </div>
+
+        <!-- PANE 3: PILIH DOKUMEN SUPIR (PRESET CEPAT) -->
+        <div id="pane_preset" style="display:none;">
+          <div style="font-size:12px;color:var(--mute);margin-bottom:10px;">
+            Pilih surat jalan dari armada yang baru tiba di dermaga untuk langsung diverifikasi sistem:
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+            <button class="preset-sj-btn" type="button" onclick="ScanSuratJalan.scanPresetWithAnalysis('subang1')">
+              <b style="color:var(--ink);font-size:12.5px;">PT Unggas Jaya Bersama</b>
+              <span style="font-size:11px;color:var(--mute);">Truk: B 9421 KDA &middot; 2.500 Ekor (5.120 kg)</span>
+              <span style="color:var(--blue);font-size:11px;font-weight:700;margin-top:2px;">Foto &amp; Analisis Dokumen &rarr;</span>
+            </button>
+            <button class="preset-sj-btn" type="button" onclick="ScanSuratJalan.scanPresetWithAnalysis('subang2')">
+              <b style="color:var(--ink);font-size:12.5px;">CV Barokah Subang Unggas</b>
+              <span style="font-size:11px;color:var(--mute);">Truk: D 8812 AB &middot; 3.200 Ekor (6.560 kg)</span>
+              <span style="color:var(--blue);font-size:11px;font-weight:700;margin-top:2px;">Foto &amp; Analisis Dokumen &rarr;</span>
+            </button>
+            <button class="preset-sj-btn" type="button" onclick="ScanSuratJalan.scanPresetWithAnalysis('sukabumi')">
+              <b style="color:var(--ink);font-size:12.5px;">Peternakan Mandiri Broiler</b>
+              <span style="font-size:11px;color:var(--mute);">Truk: F 8234 XY &middot; 2.800 Ekor (5.600 kg)</span>
+              <span style="color:var(--blue);font-size:11px;font-weight:700;margin-top:2px;">Foto &amp; Analisis Dokumen &rarr;</span>
+            </button>
+            <button class="preset-sj-btn" type="button" onclick="ScanSuratJalan.scanPresetWithAnalysis('bogor')">
+              <b style="color:var(--ink);font-size:12.5px;">Kemitraan Ternak Utama</b>
+              <span style="font-size:11px;color:var(--mute);">Truk: B 9102 TGA &middot; 2.000 Ekor (4.100 kg)</span>
+              <span style="color:var(--blue);font-size:11px;font-weight:700;margin-top:2px;">Foto &amp; Analisis Dokumen &rarr;</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Wadah Hasil Pindai di Dalam Modal (Setelah Analisis Selesai) -->
+        <div id="modalScanResult" style="display:none;"></div>
+      </div>
+
+      <div class="modal-footer" style="display:flex;justify-content:space-between;align-items:center;padding:12px 18px;border-top:1px solid var(--line);">
+        <button class="btn btn-danger" id="btnFooterStopCam" type="button" onclick="ScanSuratJalan.stopCamera()" style="display:none;font-weight:700;background:#dc2626;color:#ffffff;border:none;">
+          🛑 Matikan Kamera
+        </button>
+        <button class="btn" data-close-modal onclick="ScanSuratJalan.closeModal()" type="button" style="margin-left:auto;">
+          ✕ Tutup Pop-up (ESC)
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script src="../assets/js/api.js"></script>
+  <script src="../assets/js/auth.js"></script>
+  <script src="../assets/js/lot.js"></script>
+  <script src="../assets/js/surat-jalan.js?v=2.6"></script>
+  <script src="../assets/js/app.js"></script>
+  <script>
+    async function initPenerimaan() {
+      await FarmerStore.init();
+      await LotStore.init();
+
+      // Populate peternak dropdown
+      const selPeternak = document.getElementById('peternakNama');
+      const farmers = FarmerStore.getAll();
+      if (selPeternak) {
+        if (farmers && farmers.length) {
+          selPeternak.innerHTML = farmers.map(f => `<option value="${f.id}" data-name="${f.name}">${f.name} (${f.region})</option>`).join('');
+        } else {
+          selPeternak.innerHTML = '<option value="">(Belum ada mitra peternak – Tambahkan di menu Peternak)</option>';
+        }
+      }
+
+      updateNextLotCode();
+      renderTrukTable();
+    }
+
+    function updateNextLotCode() {
+      const lots = LotStore.getAll();
+      const codeInput = document.getElementById('lotCode');
+      if (codeInput) {
+        const nextNum = lots.length + 1;
+        codeInput.value = `L-0610-${String(nextNum).padStart(2, '0')}`;
+      }
+    }
+
+    function renderTrukTable() {
+      const tbody = document.getElementById('trukQueueBody');
+      if (!tbody) return;
+
+      const lots = LotStore.getAll();
+      if (!lots.length) {
+        tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:24px;color:var(--mute);">Belum ada antrian truk hari ini. Pindai surat jalan di atas untuk menambahkan truk.</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = lots.map(l => {
+        let bobotTerima = '–';
+        let selisihSusut = '–';
+        let statusBadge = '';
+        let aksiBtn = '';
+
+        if (l.hidup != null && l.hidup > 0) {
+          bobotTerima = `${LotStore.f(l.hidup, 0)} kg`;
+          const diffKg = l.kirim - l.hidup;
+          const diffPct = (diffKg / l.kirim * 100);
+          const isHigh = diffPct > 2.0;
+          selisihSusut = `<span class="${isHigh ? 'neg' : ''}" style="font-weight:600;">−${LotStore.f(diffKg, 0)} kg (${diffPct.toFixed(2)}%)</span>`;
+          statusBadge = `<span class="badge badge-success">Selesai Bongkar</span>`;
+          aksiBtn = `<a href="timbang-susut.html?lot=${encodeURIComponent(l.id)}" class="btn btn-sm">Lihat Timbangan</a>`;
+        } else {
+          statusBadge = `<span class="badge badge-warning">Sedang Bongkar</span>`;
+          aksiBtn = `<a href="timbang-susut.html?lot=${encodeURIComponent(l.id)}&stage=hidup" class="btn btn-primary btn-sm" style="font-weight:600;">
+            Timbang Bongkar &rarr;
+          </a>`;
+        }
+
+        return `
+          <tr>
+            <td class="text-left"><code style="font-weight:700;color:var(--ink);">${l.id}</code></td>
+            <td class="text-left" style="font-weight:600;color:var(--ink);">${l.nama}</td>
+            <td class="text-right">${LotStore.f(l.ekor, 0)} ekor</td>
+            <td class="text-right">${LotStore.f(l.kirim, 0)} kg</td>
+            <td class="text-right" style="font-weight:600;">${bobotTerima}</td>
+            <td class="text-right">${selisihSusut}</td>
+            <td class="text-center">${statusBadge}</td>
+            <td class="text-center">${aksiBtn}</td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      initPenerimaan();
+
+      // Submit Form Kedatangan Truk Manual
+      const form = document.getElementById('formPenerimaan');
+      if (form) {
+        form.onsubmit = async (e) => {
+          e.preventDefault();
+
+          const lotCode = document.getElementById('lotCode').value;
+          const noPol = document.getElementById('noPol').value.trim();
+          const selP = document.getElementById('peternakNama');
+          const farmerId = parseInt(selP.value) || 1;
+          const farmerName = selP.options && selP.selectedIndex >= 0 ? (selP.options[selP.selectedIndex].getAttribute('data-name') || selP.options[selP.selectedIndex].text) : 'Mitra Peternak';
+          const ekor = parseInt(document.getElementById('jumlahEkor').value) || 0;
+          const kirim = parseFloat(document.getElementById('bobotKirim').value) || 0;
+          const sopir = document.getElementById('sopir').value.trim();
+
+          const newLotData = {
+            id: lotCode,
+            nama: `${farmerName} (${noPol || 'Truk'})`,
+            farmer_id: farmerId,
+            ekor: ekor,
+            kirim: kirim,
+            hidup: null,
+            modal: 21500,
+            jual: 36000,
+            basis: 'kirim',
+            status: 'waiting'
+          };
+
+          await LotStore.add(newLotData);
+          App.toast(`Truk ${noPol} (Lot ${lotCode}) berhasil didaftarkan di dermaga bongkar!`, 'success');
+          if (window.Auth && Auth.beep) Auth.beep(880, 0.1, 'sine');
+
+          form.reset();
+          updateNextLotCode();
+          renderTrukTable();
+        };
+      }
+    });
+  </script>
+</body>
+</html>
